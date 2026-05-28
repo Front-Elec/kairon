@@ -46,3 +46,11 @@ Biblioteca digital moderna y sistema de estudio (MVP para Taller Frontend).
 
 Variable requerida:
 - `VITE_API_BASE_URL` (debe ser URL válida)
+
+## ESLint estricto (Issue #6)
+- Configuración principal en `eslint.config.js`
+- Reglas reforzadas para evitar código muerto:
+  - `@typescript-eslint/no-unused-vars: error`
+  - `no-unreachable: error`
+- El script `npm run build` ejecuta lint antes del build:
+  - `npm run lint && tsc -b && vite build`
