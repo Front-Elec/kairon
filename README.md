@@ -38,3 +38,11 @@ Biblioteca digital moderna y sistema de estudio (MVP para Taller Frontend).
 3. Verificar publish directory `dist`
 4. Configurar variable `VITE_API_BASE_URL` en Netlify
 5. Confirmar deploy exitoso al mergear a `main`
+
+## Variables de entorno (Issue #5)
+- Archivo ejemplo: `.env.example`
+- Validación runtime con Zod: `src/config/env.ts`
+- Tipado estricto de `import.meta.env`: `src/vite-env.d.ts`
+
+Variable requerida:
+- `VITE_API_BASE_URL` (debe ser URL válida)
