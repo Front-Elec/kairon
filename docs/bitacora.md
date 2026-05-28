@@ -47,7 +47,7 @@ npm run build
 | **Rol** | Integrante 1 — DevOps & Git Flow Lead |
 | **Issue** | #2 — Configurar protección de rama `main` y estrategia de branches |
 | **Rama** | `feature/issue-2-branch-protection` |
-| **PR** | [Pegar URL del PR al crearlo] |
+| **PR** | [Pegar URL del PR cuando esté mergeado] |
 
 ### Trabajo realizado
 - Reglamento de rama en GitHub: **Proteger main - Kairon**
@@ -72,3 +72,30 @@ npm run build
 ### Notas
 - **Netlify deploy** → Issue #4
 - **Plantilla PR / labels** → Issue #3
+
+---
+
+## Sesión 2026-05-27 — Issue #3
+
+| Campo | Detalle |
+|-------|---------|
+| **Integrante** | Alejandro Rodriguez - Sky-787 |
+| **Rol** | Integrante 1 — DevOps & Git Flow Lead |
+| **Issue** | #3 — Crear plantilla de Pull Request y etiquetas en GitHub |
+| **Rama** | `feature/issue-3-pr-template` |
+| **PR** | [Pegar URL del PR cuando esté mergeado] |
+
+### Trabajo realizado
+- Plantilla de PR actualizada en `.github/PULL_REQUEST_TEMPLATE.md`
+- Sección de issue relacionado con `Closes #N`
+- Sección de validación de pruebas (`¿Qué se probó?`)
+- Checklist reforzado: `lint`, `build`, `test` (si aplica) y evidencia
+- Labels de GitHub ya creadas en el repositorio
+
+### Evidencia para el PDF (capturas de pantalla)
+| # | Qué capturar | Issue |
+|---|--------------|-------|
+| 1 | Archivo `.github/PULL_REQUEST_TEMPLATE.md` actualizado | #3 |
+| 2 | PR con `Closes #3` | #3 |
+| 3 | GitHub Issue #3 (estado Closed) | #3 |
+| 4 | Labels del repositorio (`devops`, `qa`, `ui-ux`, `interactions`, `state`, `performance`, `team`) | #3 |
