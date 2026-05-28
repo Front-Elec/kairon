@@ -133,3 +133,31 @@ npm run build
 | 3 | Netlify dashboard con proyecto conectado | #4 |
 | 4 | Deploy en estado Published / Success | #4 |
 | 5 | GitHub Issue #4 (estado Closed) | #4 |
+
+---
+
+## Sesión 2026-05-27 — Issue #5
+
+| Campo | Detalle |
+|-------|---------|
+| **Integrante** | Alejandro Rodriguez - Sky-787 |
+| **Rol** | Integrante 1 — DevOps & Git Flow Lead |
+| **Issue** | #5 — Configurar variables de entorno y validación con Zod |
+| **Rama** | `feature/issue-5-env-zod` |
+| **PR** | [Pegar URL del PR cuando esté mergeado] |
+
+### Trabajo realizado
+- Validación de variables de entorno con Zod en `src/config/env.ts`
+- Manejo de error legible cuando falta o es inválida una variable
+- Tipado estricto de `import.meta.env` en `src/vite-env.d.ts`
+- Documentación en `README.md` (sección Issue #5)
+- `.env.example` ya incluido con `VITE_API_BASE_URL`
+
+### Evidencia para el PDF (capturas de pantalla)
+| # | Qué capturar | Issue |
+|---|--------------|-------|
+| 1 | `.env.example` con `VITE_API_BASE_URL` | #5 |
+| 2 | `src/config/env.ts` validando con Zod | #5 |
+| 3 | `src/vite-env.d.ts` con tipado de variables | #5 |
+| 4 | README con sección "Variables de entorno (Issue #5)" | #5 |
+| 5 | PR con `Closes #5` + Issue #5 cerrada | #5 |
