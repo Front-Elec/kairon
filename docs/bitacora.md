@@ -161,3 +161,33 @@ npm run build
 | 3 | `src/vite-env.d.ts` con tipado de variables | #5 |
 | 4 | README con sección "Variables de entorno (Issue #5)" | #5 |
 | 5 | PR con `Closes #5` + Issue #5 cerrada | #5 |
+
+---
+
+## Sesión 2026-05-27 — Issue #6
+
+| Campo | Detalle |
+|-------|---------|
+| **Integrante** | Alejandro Rodriguez - Sky-787 |
+| **Rol** | Integrante 1 — DevOps & Git Flow Lead |
+| **Issue** | #6 — Configurar ESLint sin excepciones para build de producción |
+| **Rama** | `feature/issue-6-eslint-build` |
+| **PR** | [Pegar URL del PR cuando esté mergeado] |
+
+### Trabajo realizado
+- Reglas ESLint reforzadas en `eslint.config.js`
+  - `@typescript-eslint/no-unused-vars` en error
+  - `no-unreachable` en error
+- Build encadenado con lint en `package.json`:
+  - `npm run build` ahora ejecuta `npm run lint && tsc -b && vite build`
+- Documentación actualizada en README (sección Issue #6)
+- Validación local de `npm run lint` y `npm run build`
+
+### Evidencia para el PDF (capturas de pantalla)
+| # | Qué capturar | Issue |
+|---|--------------|-------|
+| 1 | `eslint.config.js` con reglas reforzadas | #6 |
+| 2 | `package.json` mostrando script `build` con lint previo | #6 |
+| 3 | Terminal con `npm run lint` exitoso | #6 |
+| 4 | Terminal con `npm run build` exitoso (incluyendo lint) | #6 |
+| 5 | PR con `Closes #6` + Issue #6 cerrada | #6 |
