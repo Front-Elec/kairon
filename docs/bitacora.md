@@ -99,3 +99,37 @@ npm run build
 | 2 | PR con `Closes #3` | #3 |
 | 3 | GitHub Issue #3 (estado Closed) | #3 |
 | 4 | Labels del repositorio (`devops`, `qa`, `ui-ux`, `interactions`, `state`, `performance`, `team`) | #3 |
+
+---
+
+## Sesión 2026-05-27 — Issue #4
+
+| Campo | Detalle |
+|-------|---------|
+| **Integrante** | Alejandro Rodriguez - Sky-787 |
+| **Rol** | Integrante 1 — DevOps & Git Flow Lead |
+| **Issue** | #4 — Configurar pipeline CI/CD en Netlify |
+| **Rama** | `feature/issue-4-netlify-cicd` |
+| **PR** | [Pegar URL del PR cuando esté mergeado] |
+
+### Trabajo realizado
+- Configuración de Netlify validada en `netlify.toml`:
+  - `command = "npm run build"`
+  - `publish = "dist"`
+  - Redirect SPA `/* -> /index.html`
+- `README.md` actualizado con sección Netlify y checklist operativo
+- Pipeline local validado con `npm run build`
+
+### Pendiente manual en plataforma Netlify
+- Importar el repositorio en Netlify
+- Configurar variable de entorno `VITE_API_BASE_URL`
+- Confirmar deploy automático en merge a `main`
+
+### Evidencia para el PDF (capturas de pantalla)
+| # | Qué capturar | Issue |
+|---|--------------|-------|
+| 1 | Archivo `netlify.toml` con build/publish/redirect | #4 |
+| 2 | README con sección "Netlify (Issue #4)" | #4 |
+| 3 | Netlify dashboard con proyecto conectado | #4 |
+| 4 | Deploy en estado Published / Success | #4 |
+| 5 | GitHub Issue #4 (estado Closed) | #4 |
