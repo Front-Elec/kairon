@@ -1,4 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { useMemo, useCallback } from 'react';
+import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 
 interface Loan {
@@ -18,13 +19,31 @@ const mockLoans: Loan[] = [
 ];
 
 export const LoansPage = () => {
-  const getStatusBadge = (status: Loan['status']) => {
+  /**
+   * useCallback: getStatusBadge es un helper que se pasa implícitamente
+   * al renderizar cada fila. Al envolverlo en useCallback, React garantiza
+   * que la referencia de la función sea estable entre renders, evitando
+   * que filas memoizadas se re-rendericen sin necesidad.
+   */
+  const getStatusBadge = useCallback((status: Loan['status']) => {
     switch (status) {
-      case 'active': return <Badge variant="primary">Activo</Badge>;
+      case 'active':   return <Badge variant="primary">Activo</Badge>;
       case 'returned': return <Badge variant="secondary">Devuelto</Badge>;
-      case 'overdue': return <Badge variant="accent">Vencido</Badge>;
+      case 'overdue':  return <Badge variant="accent">Vencido</Badge>;
     }
-  };
+  }, []); // sin dependencias: la lógica no cambia
+
+  /**
+   * useMemo: calcula el resumen de estadísticas derivadas de mockLoans
+   * una sola vez. Si la lista no cambia, este cálculo no se repite
+   * aunque el componente se re-renderice por causas externas.
+   */
+  const loanStats = useMemo(() => {
+    const active  = mockLoans.filter((l) => l.status === 'active').length;
+    const overdue = mockLoans.filter((l) => l.status === 'overdue').length;
+    const returned = mockLoans.filter((l) => l.status === 'returned').length;
+    return { active, overdue, returned, total: mockLoans.length };
+  }, []); // mockLoans es constante; sin dependencias reactivas
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -32,6 +51,22 @@ export const LoansPage = () => {
         <h1 className="text-3xl font-bold text-gray-900">Mis Préstamos</h1>
         <p className="text-secondary mt-1">Historial y estado actual de tus libros solicitados.</p>
       </header>
+
+      {/* Resumen derivado con useMemo */}
+      <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="bg-white border border-secondary/10 rounded-xl p-4 shadow-sm">
+          <p className="text-2xl font-bold text-primary">{loanStats.active}</p>
+          <p className="text-xs text-secondary mt-1">Activos</p>
+        </div>
+        <div className="bg-white border border-secondary/10 rounded-xl p-4 shadow-sm">
+          <p className="text-2xl font-bold text-accent">{loanStats.overdue}</p>
+          <p className="text-xs text-secondary mt-1">Vencidos</p>
+        </div>
+        <div className="bg-white border border-secondary/10 rounded-xl p-4 shadow-sm">
+          <p className="text-2xl font-bold text-gray-400">{loanStats.returned}</p>
+          <p className="text-xs text-secondary mt-1">Devueltos</p>
+        </div>
+      </div>
 
       <Card>
         <CardContent className="p-0">
