@@ -14,33 +14,30 @@ export default defineConfig({
     },
   },
   build: {
+    // Target navegadores modernos: genera código más liviano sin polyfills innecesarios
+    target: 'esnext',
+    // Alerta si un chunk supera 500kb
+    chunkSizeWarningLimit: 500,
     rollupOptions: {
       output: {
         /**
-         * manualChunks garantiza que cada página lazy genere
-         * su propio archivo .js en el Network tab, facilitando
-         * verificar que el code splitting funciona correctamente.
+         * manualChunks: separa vendors de páginas para maximizar
+         * el cache hit entre deploys.
          *
-         * Estrategia:
-         *  - 'vendor'  → librerías de node_modules (react, react-dom, react-router)
-         *  - 'pages'   → todas las páginas de la app (cada una llega como chunk separado
-         *               porque están envueltas en React.lazy en AppRouter)
+         *  - 'vendor-react'  → react + react-dom (chunk más pesado y estable)
+         *  - 'vendor-router' → react-router + @remix-run
+         *  - 'vendor'        → resto de node_modules
+         *  - páginas lazy    → Rollup las nombra automáticamente por import()
          */
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            // Agrupar react-router en su propio chunk
+            if (id.includes('react-dom') || (id.includes('react') && !id.includes('react-router'))) {
+              return 'vendor-react';
+            }
             if (id.includes('react-router') || id.includes('@remix-run')) {
               return 'vendor-router';
             }
-            // El resto de dependencias en un chunk vendor genérico
             return 'vendor';
-          }
-          // Las páginas lazy se dividen automáticamente por Rollup;
-          // no hace falta forzarlas aquí, pero podemos nombrar el grupo.
-          if (id.includes('/src/pages/')) {
-            // Rollup creará un chunk por cada import() dinámico —
-            // retornar undefined aquí deja que Rollup los nombre solo.
-            return undefined;
           }
         },
       },

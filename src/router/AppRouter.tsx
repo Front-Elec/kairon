@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import { Suspense, lazy } from 'react';
 import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import { Navbar } from '../components/layout/Navbar';
 import { PageLoader } from '../components/ui/PageLoader';
