@@ -1,12 +1,21 @@
+import { useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 
 export const Navbar = () => {
-  const navLinks = [
-    { to: '/', label: 'Catálogo' },
-    { to: '/loans', label: 'Préstamos' },
-    { to: '/admin', label: 'Admin' },
-    { to: '/stats', label: 'Estadísticas' },
-  ];
+  /**
+   * useMemo: el array de enlaces es un valor derivado estático.
+   * Sin memo, React recrearía el array en cada render del Navbar,
+   * lo que generaría referencias nuevas innecesarias.
+   */
+  const navLinks = useMemo(
+    () => [
+      { to: '/',      label: 'Catálogo'      },
+      { to: '/loans', label: 'Préstamos'     },
+      { to: '/admin', label: 'Admin'         },
+      { to: '/stats', label: 'Estadísticas'  },
+    ],
+    [] // sin dependencias: los enlaces son constantes
+  );
 
   return (
     <nav className="bg-white border-b border-secondary/10 px-4 py-3 sticky top-0 z-50">
@@ -17,7 +26,7 @@ export const Navbar = () => {
           </div>
           <span className="text-xl font-bold text-gray-900">Kairon</span>
         </div>
-        
+
         <div className="flex gap-6">
           {navLinks.map((link) => (
             <NavLink
