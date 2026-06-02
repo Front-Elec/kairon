@@ -31,7 +31,7 @@ export const LoansPage = () => {
       case 'returned': return <Badge variant="secondary">Devuelto</Badge>;
       case 'overdue':  return <Badge variant="accent">Vencido</Badge>;
     }
-  }, []); // sin dependencias: la lógica no cambia
+  }, []);
 
   /**
    * useMemo: calcula el resumen de estadísticas derivadas de mockLoans
@@ -39,11 +39,11 @@ export const LoansPage = () => {
    * aunque el componente se re-renderice por causas externas.
    */
   const loanStats = useMemo(() => {
-    const active  = mockLoans.filter((l) => l.status === 'active').length;
-    const overdue = mockLoans.filter((l) => l.status === 'overdue').length;
+    const active   = mockLoans.filter((l) => l.status === 'active').length;
+    const overdue  = mockLoans.filter((l) => l.status === 'overdue').length;
     const returned = mockLoans.filter((l) => l.status === 'returned').length;
     return { active, overdue, returned, total: mockLoans.length };
-  }, []); // mockLoans es constante; sin dependencias reactivas
+  }, []);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -53,17 +53,17 @@ export const LoansPage = () => {
       </header>
 
       {/* Resumen derivado con useMemo */}
-      <div className="grid grid-cols-3 gap-4 text-center">
+      <div className="grid grid-cols-3 gap-4 text-center" role="region" aria-label="Resumen de préstamos">
         <div className="bg-white border border-secondary/10 rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-primary">{loanStats.active}</p>
+          <p className="text-2xl font-bold text-primary" aria-label={`${loanStats.active} préstamos activos`}>{loanStats.active}</p>
           <p className="text-xs text-secondary mt-1">Activos</p>
         </div>
         <div className="bg-white border border-secondary/10 rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-accent">{loanStats.overdue}</p>
+          <p className="text-2xl font-bold text-accent" aria-label={`${loanStats.overdue} préstamos vencidos`}>{loanStats.overdue}</p>
           <p className="text-xs text-secondary mt-1">Vencidos</p>
         </div>
         <div className="bg-white border border-secondary/10 rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-gray-400">{loanStats.returned}</p>
+          <p className="text-2xl font-bold text-gray-400" aria-label={`${loanStats.returned} préstamos devueltos`}>{loanStats.returned}</p>
           <p className="text-xs text-secondary mt-1">Devueltos</p>
         </div>
       </div>
@@ -71,13 +71,14 @@ export const LoansPage = () => {
       <Card>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            {/* scope="col" en th mejora accesibilidad de tablas (Lighthouse Accessibility) */}
+            <table className="w-full text-left border-collapse" aria-label="Tabla de préstamos">
               <thead>
                 <tr className="border-b border-secondary/10 bg-gray-50/50">
-                  <th className="px-6 py-4 text-xs font-semibold text-secondary uppercase tracking-wider">Libro</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-secondary uppercase tracking-wider hidden md:table-cell">Fecha Préstamo</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-secondary uppercase tracking-wider">Fecha Devolución</th>
-                  <th className="px-6 py-4 text-xs font-semibold text-secondary uppercase tracking-wider text-right">Estado</th>
+                  <th scope="col" className="px-6 py-4 text-xs font-semibold text-secondary uppercase tracking-wider">Libro</th>
+                  <th scope="col" className="px-6 py-4 text-xs font-semibold text-secondary uppercase tracking-wider hidden md:table-cell">Fecha Préstamo</th>
+                  <th scope="col" className="px-6 py-4 text-xs font-semibold text-secondary uppercase tracking-wider">Fecha Devolución</th>
+                  <th scope="col" className="px-6 py-4 text-xs font-semibold text-secondary uppercase tracking-wider text-right">Estado</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-secondary/5">

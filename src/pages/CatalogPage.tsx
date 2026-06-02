@@ -35,7 +35,7 @@ export const CatalogPage = () => {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setSearch(e.target.value);
     },
-    [] // sin dependencias: la función nunca cambia
+    []
   );
 
   /**
@@ -61,28 +61,31 @@ export const CatalogPage = () => {
       </header>
 
       {/* Sección de Filtros */}
-      <section className="flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-xl border border-secondary/10 shadow-sm">
+      <section aria-label="Filtros de búsqueda" className="flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-xl border border-secondary/10 shadow-sm">
         <div className="relative w-full flex-grow">
+          <label htmlFor="search-books" className="sr-only">Buscar libros</label>
           <Input
+            id="search-books"
             placeholder="Buscar por título o autor..."
             className="pl-4 py-2.5"
             value={search}
             onChange={handleSearchChange}
+            aria-label="Buscar por título o autor"
           />
         </div>
         <div className="flex gap-2 w-full md:w-auto">
           {/* Placeholders para filtros extra (Integrante 5) */}
-          <div className="px-4 py-2 bg-gray-50 border border-secondary/10 rounded-md text-sm text-secondary cursor-not-allowed">
+          <div className="px-4 py-2 bg-gray-50 border border-secondary/10 rounded-md text-sm text-secondary cursor-not-allowed" aria-disabled="true">
             Categoría
           </div>
-          <div className="px-4 py-2 bg-gray-50 border border-secondary/10 rounded-md text-sm text-secondary cursor-not-allowed">
+          <div className="px-4 py-2 bg-gray-50 border border-secondary/10 rounded-md text-sm text-secondary cursor-not-allowed" aria-disabled="true">
             Disponibilidad
           </div>
         </div>
       </section>
 
       {/* Grid Responsive - Mobile First */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <section aria-label="Lista de libros" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredBooks.map((book) => (
           <Card key={book.id} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
             <CardHeader className="pb-2">
@@ -101,11 +104,17 @@ export const CatalogPage = () => {
             <CardContent>
               <p className="text-sm font-medium text-gray-600 mb-4">{book.author}</p>
               <div className="pt-4 border-t border-secondary/5 flex justify-between items-center">
-                <button className="text-xs font-semibold text-primary hover:underline underline-offset-4">
+                <button
+                  className="text-xs font-semibold text-primary hover:underline underline-offset-4"
+                  aria-label={`Ver detalles de ${book.title}`}
+                >
                   Ver detalles
                 </button>
                 {book.available && (
-                  <button className="text-xs font-semibold bg-primary text-white px-3 py-1.5 rounded-md hover:bg-blue-700 transition-colors">
+                  <button
+                    className="text-xs font-semibold bg-primary text-white px-3 py-1.5 rounded-md hover:bg-blue-700 transition-colors"
+                    aria-label={`Solicitar préstamo de ${book.title}`}
+                  >
                     Solicitar
                   </button>
                 )}

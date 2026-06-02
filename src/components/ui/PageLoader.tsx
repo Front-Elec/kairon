@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * PageLoader — fallback de <Suspense> para code splitting.
  * Se muestra mientras Vite descarga el chunk de la página solicitada.
