@@ -1,3 +1,4 @@
+import { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
@@ -23,6 +24,35 @@ const mockBooks: Book[] = [
 ];
 
 export const CatalogPage = () => {
+  const [search, setSearch] = useState('');
+
+  /**
+   * useCallback: estabiliza el handler del input entre renders.
+   * Sin esto, cada render crearía una nueva función, causando
+   * re-renders innecesarios en componentes hijos que la reciban como prop.
+   */
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearch(e.target.value);
+    },
+    [] // sin dependencias: la función nunca cambia
+  );
+
+  /**
+   * useMemo: el filtrado de la lista solo se recalcula cuando cambia
+   * el texto de búsqueda. Si el componente re-renderiza por otro motivo,
+   * la lista filtrada se reutiliza sin recomputar.
+   */
+  const filteredBooks = useMemo(() => {
+    const query = search.toLowerCase().trim();
+    if (!query) return mockBooks;
+    return mockBooks.filter(
+      (book) =>
+        book.title.toLowerCase().includes(query) ||
+        book.author.toLowerCase().includes(query)
+    );
+  }, [search]);
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <header className="space-y-2">
@@ -33,9 +63,11 @@ export const CatalogPage = () => {
       {/* Sección de Filtros */}
       <section className="flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-xl border border-secondary/10 shadow-sm">
         <div className="relative w-full flex-grow">
-          <Input 
-            placeholder="Buscar por título o autor..." 
+          <Input
+            placeholder="Buscar por título o autor..."
             className="pl-4 py-2.5"
+            value={search}
+            onChange={handleSearchChange}
           />
         </div>
         <div className="flex gap-2 w-full md:w-auto">
@@ -51,7 +83,7 @@ export const CatalogPage = () => {
 
       {/* Grid Responsive - Mobile First */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {mockBooks.map((book) => (
+        {filteredBooks.map((book) => (
           <Card key={book.id} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
             <CardHeader className="pb-2">
               <div className="flex justify-between items-start">
@@ -85,4 +117,3 @@ export const CatalogPage = () => {
     </div>
   );
 };
-
