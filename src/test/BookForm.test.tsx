@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 // import { BookForm } from 'src/components/BookForm'
-import { BookForm } from "../../components/BookForm"
+import { BookForm } from "../components/BookForm"
 
 describe('BookForm', () => {
   it('renderiza los campos principales del formulario', () => {
