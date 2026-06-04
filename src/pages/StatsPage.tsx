@@ -94,7 +94,7 @@ export const StatsPage = () => {
                 <YAxis dataKey="name" type="category" width={115} />
                 <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }} />
                 <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-                  {stats.categoryDistribution.map((entry, index) => (
+                  {stats.categoryDistribution.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Bar>
