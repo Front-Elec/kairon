@@ -1,32 +1,48 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { BookOpen, BookUp, Users, Clock } from 'lucide-react';
-
-const rawStats = [
-  { label: 'Libros Totales',    value: '1,284', trend: '+12 este mes',          icon: <BookOpen className="text-primary" size={24} /> },
-  { label: 'Préstamos Activos', value: '45',    trend: '85% retorno puntual',   icon: <BookUp className="text-blue-500" size={24} /> },
-  { label: 'Nuevos Usuarios',   value: '156',   trend: '+22% vs mes anterior',  icon: <Users className="text-accent" size={24} /> },
-  { label: 'Tiempo Promedio',   value: '12 días', trend: '-2 días vs 2025',     icon: <Clock className="text-green-500" size={24} /> },
-];
-
-const categoryData = [
-  { name: 'Literatura', count: 450, fill: '#6366f1' },
-  { name: 'Ciencia',    count: 320, fill: '#60a5fa' },
-  { name: 'Historia',   count: 210, fill: '#f43f5e' },
-  { name: 'Tecnología', count: 180, fill: '#4ade80' },
-];
-
-const weeklyData = [
-  { name: 'L', activity: 45 },
-  { name: 'M', activity: 60 },
-  { name: 'X', activity: 35 },
-  { name: 'J', activity: 80 },
-  { name: 'V', activity: 55 },
-  { name: 'S', activity: 70 },
-  { name: 'D', activity: 40 },
-];
+import { useBooksStore } from '@/store/booksStore';
+import { useLoansStore } from '@/store/loansStore';
+import { BookOpen, BookUp, Clock, Users } from 'lucide-react';
+import { useMemo } from 'react';
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 export const StatsPage = () => {
+  const { books } = useBooksStore();
+  const { loans } = useLoansStore();
+
+  const stats = useMemo(() => {
+    const totalBooks = books.length;
+    const totalCopies = books.reduce((sum, book) => sum + book.available, 0);
+    const availableCopies = books.reduce((sum, book) => sum + book.available, 0);
+    const activeLoans = loans.filter(l => l.status === 'active').length;
+    const returnedLoans = loans.filter(l => l.status === 'returned').length;
+    const returnRate = loans.length > 0 ? Math.round((returnedLoans / loans.length) * 100) : 0;
+    const avgLoanDuration = loans.length > 0 ? 14 : 0; // Default to 14 days
+    
+    // Calcular distribución por categoría
+    const categoryMap = new Map<string, number>();
+    books.forEach(book => {
+      categoryMap.set(book.category, (categoryMap.get(book.category) || 0) + 1);
+    });
+    const categoryDistribution = Array.from(categoryMap).map(([name, count]) => ({ name, count }));
+
+    return {
+      totalBooks,
+      totalCopies,
+      availableCopies,
+      activeLoans,
+      returnRate,
+      avgLoanDuration,
+      categoryDistribution,
+    };
+  }, [books, loans]);
+
+  const rawStats = [
+    { label: 'Libros Totales',    value: stats.totalCopies.toString(), trend: `${stats.totalBooks} títulos`, icon: <BookOpen className="text-primary" size={24} /> },
+    { label: 'Préstamos Activos', value: stats.activeLoans.toString(), trend: `${stats.returnRate}% retorno puntual`, icon: <BookUp className="text-blue-500" size={24} /> },
+    { label: 'Copias Disponibles', value: stats.availableCopies.toString(), trend: `${stats.totalCopies - stats.availableCopies} en préstamo`, icon: <Users className="text-accent" size={24} /> },
+    { label: 'Tiempo Promedio', value: `${stats.avgLoanDuration} días`, trend: 'Duración promedio de préstamo', icon: <Clock className="text-green-500" size={24} /> },
+  ];
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <header>
@@ -58,10 +74,10 @@ export const StatsPage = () => {
           </CardHeader>
           <CardContent className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={categoryData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <BarChart data={stats.categoryDistribution} layout="vertical" margin={{ top: 5, right: 30, left: 120, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                 <XAxis type="number" />
-                <YAxis dataKey="name" type="category" width={80} />
+                <YAxis dataKey="name" type="category" width={115} />
                 <Tooltip cursor={{fill: 'transparent'}} />
                 <Bar dataKey="count" radius={[0, 4, 4, 0]} />
               </BarChart>
@@ -75,7 +91,7 @@ export const StatsPage = () => {
           </CardHeader>
           <CardContent className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weeklyData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+              <BarChart data={stats.weeklyActivity} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="name" />
                 <YAxis />

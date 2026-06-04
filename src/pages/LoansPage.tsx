@@ -1,47 +1,35 @@
-import { useState, useMemo, useCallback } from 'react';
-import { Card, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
-import { CheckCircle2, Info, BookUp } from 'lucide-react';
-
-interface Loan {
-  id: number;
-  bookTitle: string;
-  author: string;
-  loanDate: string;
-  dueDate: string;
-  status: 'active' | 'returned' | 'overdue';
-  user: string;
-}
-
-const initialMockLoans: Loan[] = [
-  { id: 1, bookTitle: 'Don Quijote de la Mancha', author: 'Miguel de Cervantes', loanDate: '2026-05-15', dueDate: '2026-06-15', status: 'active', user: 'Ana Pérez' },
-  { id: 2, bookTitle: 'Cien años de soledad', author: 'Gabriel García Márquez', loanDate: '2026-04-10', dueDate: '2026-05-10', status: 'returned', user: 'Juan Gómez' },
-  { id: 3, bookTitle: '1984', author: 'George Orwell', loanDate: '2026-05-20', dueDate: '2026-06-20', status: 'active', user: 'María López' },
-  { id: 4, bookTitle: 'El Principito', author: 'Antoine de Saint-Exupéry', loanDate: '2026-03-01', dueDate: '2026-03-31', status: 'overdue', user: 'Carlos Díaz' },
-];
+import { useBooksStore } from '@/store/booksStore';
+import { useLoansStore, type Loan } from '@/store/loansStore';
+import { BookUp, CheckCircle2, Info } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
 
 export const LoansPage = () => {
-  const [loans, setLoans] = useState<Loan[]>(initialMockLoans);
+  const { loans, returnLoan, createLoan, cancelLoan } = useLoansStore();
+  const { books } = useBooksStore();
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isNewLoanModalOpen, setIsNewLoanModalOpen] = useState(false);
+  const [newLoanForm, setNewLoanForm] = useState({ bookId: '', userName: '' });
 
   const getStatusBadge = useCallback((status: Loan['status']) => {
     switch (status) {
       case 'active':   return <Badge variant="primary">Activo</Badge>;
       case 'returned': return <Badge variant="secondary">Devuelto</Badge>;
-      case 'overdue':  return <Badge variant="accent">Vencido</Badge>;
+      case 'cancelled':  return <Badge variant="accent">Cancelado</Badge>;
     }
   }, []);
 
   const loanStats = useMemo(() => {
     const active   = loans.filter((l) => l.status === 'active').length;
-    const overdue  = loans.filter((l) => l.status === 'overdue').length;
+    const cancelled  = loans.filter((l) => l.status === 'cancelled').length;
     const returned = loans.filter((l) => l.status === 'returned').length;
-    return { active, overdue, returned, total: loans.length };
+    return { active, cancelled, returned, total: loans.length };
   }, [loans]);
 
   const handleReturnClick = (loan: Loan) => {
@@ -56,7 +44,7 @@ export const LoansPage = () => {
 
   const confirmReturn = () => {
     if (selectedLoan) {
-      setLoans(prev => prev.map(l => l.id === selectedLoan.id ? { ...l, status: 'returned' } : l));
+      returnLoan(selectedLoan.id);
       setIsReturnModalOpen(false);
       setSelectedLoan(null);
     }
@@ -64,18 +52,34 @@ export const LoansPage = () => {
 
   const confirmNewLoan = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+    const book = books.find(b => b.id === newLoanForm.bookId);
+
+    if (!book) {
+      alert('Por favor selecciona un libro válido');
+      return;
+    }
+
+    if (book.available <= 0) {
+      alert('Este libro no está disponible');
+      return;
+    }
+
+    if (!newLoanForm.userName.trim()) {
+      alert('Por favor ingresa tu nombre');
+      return;
+    }
+
     const newLoan: Loan = {
-      id: Date.now(),
-      bookTitle: formData.get('bookTitle') as string,
-      author: 'Autor Desconocido',
-      user: formData.get('user') as string,
-      loanDate: new Date().toISOString().split('T')[0],
-      dueDate: formData.get('dueDate') as string,
-      status: 'active'
+      id: uuidv4().toString(),
+      bookId: newLoanForm.bookId,
+      userName: newLoanForm.userName,
+      loanDate: new Date().toISOString(),
+      status: 'active',
     };
-    setLoans([newLoan, ...loans]);
+
+    createLoan(newLoan);
     setIsNewLoanModalOpen(false);
+    setNewLoanForm({ bookId: '', userName: '' });
   };
 
   return (
@@ -97,8 +101,8 @@ export const LoansPage = () => {
           <p className="text-xs text-secondary mt-1">Activos</p>
         </div>
         <div className="bg-white border border-secondary/10 rounded-xl p-4 shadow-sm">
-          <p className="text-2xl font-bold text-accent" aria-label={`${loanStats.overdue} préstamos vencidos`}>{loanStats.overdue}</p>
-          <p className="text-xs text-secondary mt-1">Vencidos</p>
+          <p className="text-2xl font-bold text-accent" aria-label={`${loanStats.cancelled} préstamos cancelados`}>{loanStats.cancelled}</p>
+          <p className="text-xs text-secondary mt-1">Cancelados</p>
         </div>
         <div className="bg-white border border-secondary/10 rounded-xl p-4 shadow-sm">
           <p className="text-2xl font-bold text-gray-400" aria-label={`${loanStats.returned} préstamos devueltos`}>{loanStats.returned}</p>
@@ -169,7 +173,7 @@ export const LoansPage = () => {
             <div className="grid grid-cols-2 gap-4 text-sm bg-gray-50 p-4 rounded-lg">
               <div><span className="font-semibold block text-gray-500">Libro:</span> {selectedLoan.bookTitle}</div>
               <div><span className="font-semibold block text-gray-500">Autor:</span> {selectedLoan.author}</div>
-              <div><span className="font-semibold block text-gray-500">Usuario:</span> {selectedLoan.user}</div>
+              <div><span className="font-semibold block text-gray-500">Usuario:</span> {selectedLoan.userName}</div>
               <div><span className="font-semibold block text-gray-500">Estado:</span> {selectedLoan.status}</div>
               <div><span className="font-semibold block text-gray-500">Fecha de Préstamo:</span> {selectedLoan.loanDate}</div>
               <div><span className="font-semibold block text-gray-500">Fecha Límite:</span> {selectedLoan.dueDate}</div>
@@ -185,15 +189,38 @@ export const LoansPage = () => {
         <form onSubmit={confirmNewLoan} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Libro</label>
-            <input required name="bookTitle" className="w-full px-3 py-2 border border-secondary/30 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="Título del libro..." />
+            <select 
+              required 
+              value={newLoanForm.bookId}
+              onChange={(e) => setNewLoanForm({...newLoanForm, bookId: e.target.value})}
+              className="w-full px-3 py-2 border border-secondary/30 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
+            >
+              <option value="">Selecciona un libro...</option>
+              {books.map((book) => (
+                <option key={book.id} value={book.id} disabled={book.available === 0}>
+                  {book.title} ({book.available} disponibles)
+                </option>
+              ))}
+            </select>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Usuario</label>
-            <input required name="user" className="w-full px-3 py-2 border border-secondary/30 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="Nombre del usuario..." />
+            <Input 
+              required 
+              value={newLoanForm.userName}
+              onChange={(e) => setNewLoanForm({...newLoanForm, userName: e.target.value})}
+              placeholder="Nombre del usuario..." 
+            />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Fecha de Devolución</label>
-            <input required type="date" name="dueDate" className="w-full px-3 py-2 border border-secondary/30 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50" />
+            <input 
+              required 
+              type="date" 
+              value={newLoanForm.dueDate}
+              onChange={(e) => setNewLoanForm({...newLoanForm, dueDate: e.target.value})}
+              className="w-full px-3 py-2 border border-secondary/30 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50" 
+            />
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
             <Button type="button" variant="secondary" onClick={() => setIsNewLoanModalOpen(false)}>Cancelar</Button>

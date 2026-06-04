@@ -1,30 +1,21 @@
-import { useState, useMemo, useCallback } from 'react';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
-import { Badge } from '@/components/ui/Badge';
-
-// Interface preparada para el Integrante 5
-interface Book {
-  id: number;
-  title: string;
-  author: string;
-  category: string;
-  available: boolean;
-}
-
-const mockBooks: Book[] = [
-  { id: 1, title: 'Don Quijote de la Mancha', author: 'Miguel de Cervantes', category: 'Literatura', available: true },
-  { id: 2, title: 'Cien años de soledad', author: 'Gabriel García Márquez', category: 'Novela', available: false },
-  { id: 3, title: 'El Principito', author: 'Antoine de Saint-Exupéry', category: 'Infantil', available: true },
-  { id: 4, title: '1984', author: 'George Orwell', category: 'Distopía', available: true },
-  { id: 5, title: 'Rayuela', author: 'Julio Cortázar', category: 'Novela', available: false },
-  { id: 6, title: 'Ficciones', author: 'Jorge Luis Borges', category: 'Cuento', available: true },
-  { id: 7, title: 'El túnel', author: 'Ernesto Sabato', category: 'Novela', available: true },
-  { id: 8, title: 'Sobre héroes y tumbas', author: 'Ernesto Sabato', category: 'Novela', available: false },
-];
+import { Modal } from '@/components/ui/Modal';
+import { useBooksStore } from '@/store/booksStore';
+import { useLoansStore, type Loan } from '@/store/loansStore';
+import { useCallback, useMemo, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 export const CatalogPage = () => {
   const [search, setSearch] = useState('');
+  const [selectedBook, setSelectedBook] = useState<string | null>(null);
+  const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
+  const [loanForm, setLoanForm] = useState({ userName: '' });
+  
+  const { books } = useBooksStore();
+  const { createLoan } = useLoansStore();
 
   /**
    * useCallback: estabiliza el handler del input entre renders.
@@ -45,13 +36,13 @@ export const CatalogPage = () => {
    */
   const filteredBooks = useMemo(() => {
     const query = search.toLowerCase().trim();
-    if (!query) return mockBooks;
-    return mockBooks.filter(
+    if (!query) return books;
+    return books.filter(
       (book) =>
         book.title.toLowerCase().includes(query) ||
         book.author.toLowerCase().includes(query)
     );
-  }, [search]);
+  }, [search, books]);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -84,14 +75,13 @@ export const CatalogPage = () => {
         </div>
       </section>
 
-      {/* Grid Responsive - Mobile First */}
       <section aria-label="Lista de libros" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredBooks.map((book) => (
           <Card key={book.id} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
             <CardHeader className="pb-2">
               <div className="flex justify-between items-start">
-                <Badge variant={book.available ? 'primary' : 'secondary'}>
-                  {book.available ? 'Disponible' : 'Prestado'}
+                <Badge variant={book.available > 0 ? 'primary' : 'secondary'}>
+                  {book.available > 0 ? 'Disponible' : 'Prestado'}
                 </Badge>
                 <span className="text-xs text-secondary bg-secondary/5 px-2 py-0.5 rounded">
                   {book.category}
@@ -106,12 +96,20 @@ export const CatalogPage = () => {
               <div className="pt-4 border-t border-secondary/5 flex justify-between items-center">
                 <button
                   className="text-xs font-semibold text-primary hover:underline underline-offset-4"
+                  onClick={() => {
+                    setSelectedBook(book.id);
+                    setIsLoanModalOpen(true);
+                  }}
                   aria-label={`Ver detalles de ${book.title}`}
                 >
                   Ver detalles
                 </button>
-                {book.available && (
+                {book.available > 0 && (
                   <button
+                    onClick={() => {
+                      setSelectedBook(book.id);
+                      setIsLoanModalOpen(true);
+                    }}
                     className="text-xs font-semibold bg-primary text-white px-3 py-1.5 rounded-md hover:bg-blue-700 transition-colors"
                     aria-label={`Solicitar préstamo de ${book.title}`}
                   >
@@ -123,6 +121,78 @@ export const CatalogPage = () => {
           </Card>
         ))}
       </section>
+
+      <Modal 
+        isOpen={isLoanModalOpen} 
+        onClose={() => {
+          setIsLoanModalOpen(false);
+          setSelectedBook(null);
+          setLoanForm({ user: '', daysToReturn: '14' });
+        }} 
+        title="Solicitar Préstamo"
+      >
+        {selectedBook && (() => {
+          const book = books.find(b => b.id === selectedBook);
+          if (!book) return null;
+
+          const handleSubmit = (e: React.FormEvent) => {
+            e.preventDefault();
+            if (!loanForm.userName.trim()) {
+              alert('Por favor ingresa tu nombre');
+              return;
+            }
+
+            const newLoan: Loan = {
+              id: uuidv4().toString(),
+              bookId: book.id,
+              userName: loanForm.userName,
+              loanDate: new Date().toISOString(),
+              status: 'active',
+            };
+
+            createLoan(newLoan);
+            alert('¡Préstamo registrado exitosamente!');
+            setIsLoanModalOpen(false);
+            setSelectedBook(null);
+            setLoanForm({ userName: '' });
+          };
+
+          return (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="bg-gray-50 p-4 rounded-lg border border-secondary/10">
+                <p className="font-semibold">{book.title}</p>
+                <p className="text-sm text-secondary">{book.author}</p>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Tu Nombre</label>
+                <Input 
+                  required
+                  value={loanForm.userName}
+                  onChange={(e) => setLoanForm({...loanForm, userName: e.target.value})}
+                  placeholder="Nombre completo..."
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <Button 
+                  type="button" 
+                  variant="secondary" 
+                  onClick={() => {
+                    setIsLoanModalOpen(false);
+                    setSelectedBook(null);
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" variant="primary">
+                  Confirmar Solicitud
+                </Button>
+              </div>
+            </form>
+          );
+        })()}
+      </Modal>
     </div>
   );
 };
