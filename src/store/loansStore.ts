@@ -13,10 +13,36 @@ interface LoansStore {
   cancelLoan: (loanId: string) => void;
 }
 
+// Préstamos de ejemplo iniciales
+const EXAMPLE_LOANS: Loan[] = [
+  {
+    id: "loan-1",
+    bookId: "1",
+    userName: "Juan García",
+    loanDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    status: "active",
+  },
+  {
+    id: "loan-2",
+    bookId: "3",
+    userName: "María López",
+    loanDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    status: "active",
+  },
+  {
+    id: "loan-3",
+    bookId: "2",
+    userName: "Carlos Rodríguez",
+    loanDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+    returnDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    status: "returned",
+  },
+];
+
 export const useLoansStore = create<LoansStore>()(
   persist(
     (set) => ({
-      loans: [],
+      loans: EXAMPLE_LOANS,
 
       createLoan: (loan) => {
         const { books, editBook } =

@@ -1,27 +1,45 @@
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Modal } from '@/components/ui/Modal';
 import { BookForm, type BookFormData } from '@/components/BookForm';
-import { BookPlus, FileDown, Users, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Modal } from '@/components/ui/Modal';
+import { useBooksStore } from '@/store/booksStore';
+import { AlertCircle, BookPlus, FileDown, Users } from 'lucide-react';
+import { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 export const AdminPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBook, setEditingBook] = useState<BookFormData | undefined>(undefined);
+  const [editingBookId, setEditingBookId] = useState<string | undefined>(undefined);
+  const { books, addBook, editBook } = useBooksStore();
 
   const handleOpenCreateModal = () => {
     setEditingBook(undefined);
+    setEditingBookId(undefined);
     setIsModalOpen(true);
   };
 
-  const handleOpenEditModal = (book: BookFormData) => {
+  const handleOpenEditModal = (book: BookFormData, id: string) => {
     setEditingBook(book);
+    setEditingBookId(id);
     setIsModalOpen(true);
   };
 
   const handleFormSubmit = (data: BookFormData) => {
-    console.log('Book data:', data);
-    // Simulamos guardado de datos
+    if (editingBookId !== undefined) {
+      // Modo edición
+      editBook(editingBookId, data);
+    } else {
+      // Modo creación - generar ID único
+      const newBook = {
+        id: uuidv4().toString(),
+        ...data,
+        available: data.quantity || 0,
+        createdAt: new Date().toISOString(),
+        popularity: 0,
+      };
+      addBook(newBook);
+    }
     setIsModalOpen(false);
   };
 
@@ -42,19 +60,49 @@ export const AdminPage = () => {
         <section className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Inventario (Demo Modal)</CardTitle>
+              <CardTitle>Inventario</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 text-secondary bg-gray-50 rounded-lg border border-dashed border-gray-200">
-                <p>Usa los botones para probar el modal de creación y edición.</p>
-                <div className="mt-4 flex flex-wrap justify-center gap-4">
-                  <Button variant="secondary" onClick={() => handleOpenEditModal({
-                    title: 'Rayuela', author: 'Julio Cortázar', category: 'Novela', isbn: '123-4-56-789012-3', year: 1963, quantity: 5, description: 'Contranovela de Julio Cortázar.'
-                  })}>
-                    Simular Editar "Rayuela"
-                  </Button>
+              {books.length === 0 ? (
+                <div className="text-center py-12 text-secondary bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                  <p>No hay libros registrados.</p>
                 </div>
-              </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead className="border-b border-secondary/10">
+                      <tr>
+                        <th className="px-4 py-3 font-semibold text-secondary">Título</th>
+                        <th className="px-4 py-3 font-semibold text-secondary">Autor</th>
+                        <th className="px-4 py-3 font-semibold text-secondary">Categoría</th>
+                        <th className="px-4 py-3 font-semibold text-secondary">Cantidad</th>
+                        <th className="px-4 py-3 font-semibold text-secondary">Disponible</th>
+                        <th className="px-4 py-3 font-semibold text-secondary text-center">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-secondary/5">
+                      {books.map((book) => (
+                        <tr key={book.id} className="hover:bg-gray-50/50">
+                          <td className="px-4 py-3 font-medium">{book.title}</td>
+                          <td className="px-4 py-3 text-secondary">{book.author}</td>
+                          <td className="px-4 py-3 text-secondary">{book.category}</td>
+                          <td className="px-4 py-3">{book.quantity}</td>
+                          <td className="px-4 py-3">{book.available}</td>
+                          <td className="px-4 py-3 text-center">
+                            <Button 
+                              variant="secondary" 
+                              className="text-xs py-1 px-2"
+                              onClick={() => handleOpenEditModal(book as BookFormData, book.id)}
+                            >
+                              Editar
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </section>
