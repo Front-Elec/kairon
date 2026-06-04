@@ -3,7 +3,7 @@ import { useBooksStore } from '@/store/booksStore';
 import { useLoansStore } from '@/store/loansStore';
 import { BookOpen, BookUp, Clock, Users } from 'lucide-react';
 import { useMemo } from 'react';
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell } from 'recharts';
 
 export const StatsPage = () => {
   const { books } = useBooksStore();
@@ -25,6 +25,16 @@ export const StatsPage = () => {
     });
     const categoryDistribution = Array.from(categoryMap).map(([name, count]) => ({ name, count }));
 
+    // Calcular actividad semanal (préstamos por día de la semana)
+    const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const activityMap = new Map(days.map(d => [d, 0]));
+    loans.forEach(loan => {
+      const date = new Date(loan.loanDate);
+      const dayName = days[date.getDay()];
+      activityMap.set(dayName, activityMap.get(dayName)! + 1);
+    });
+    const weeklyActivity = Array.from(activityMap).map(([name, activity]) => ({ name, activity }));
+
     return {
       totalBooks,
       totalCopies,
@@ -33,6 +43,7 @@ export const StatsPage = () => {
       returnRate,
       avgLoanDuration,
       categoryDistribution,
+      weeklyActivity,
     };
   }, [books, loans]);
 
@@ -42,6 +53,9 @@ export const StatsPage = () => {
     { label: 'Copias Disponibles', value: stats.availableCopies.toString(), trend: `${stats.totalCopies - stats.availableCopies} en préstamo`, icon: <Users className="text-accent" size={24} /> },
     { label: 'Tiempo Promedio', value: `${stats.avgLoanDuration} días`, trend: 'Duración promedio de préstamo', icon: <Clock className="text-green-500" size={24} /> },
   ];
+
+    // Paleta de colores atractiva para la gráfica
+    const COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', '#eab308', '#10b981', '#06b6d4'];
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -78,8 +92,12 @@ export const StatsPage = () => {
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                 <XAxis type="number" />
                 <YAxis dataKey="name" type="category" width={115} />
-                <Tooltip cursor={{fill: 'transparent'}} />
-                <Bar dataKey="count" radius={[0, 4, 4, 0]} />
+                <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }} />
+                <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+                  {stats.categoryDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

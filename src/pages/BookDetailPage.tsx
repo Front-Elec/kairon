@@ -1,22 +1,48 @@
 import { useParams, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { Input } from '@/components/ui/Input';
+import { Modal } from '@/components/ui/Modal';
+import { useBooksStore } from '@/store/booksStore';
+import { useLoansStore, type Loan } from '@/store/loansStore';
+import { v4 as uuidv4 } from 'uuid';
 
 export const BookDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { books } = useBooksStore();
+  const { createLoan } = useLoansStore();
 
-  // Mock data - Integrante 5 conectará esto a la lógica real
-  const book = {
-    id,
-    title: 'Don Quijote de la Mancha',
-    author: 'Miguel de Cervantes Saavedra',
-    year: '1605',
-    category: 'Literatura Clásica',
-    description: 'La obra maestra de la literatura española relata las aventuras de un hidalgo que, tras leer demasiados libros de caballerías, decide convertirse en caballero andante para deshacer agravios y proteger a los desvalidos.',
-    isbn: '978-84-204-1214-6',
-    available: true,
+  const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
+  const [loanForm, setLoanForm] = useState({ userName: '' });
+
+  const book = books.find(b => b.id === id);
+
+  if (!book) {
+    return <div className="text-center py-12">Libro no encontrado</div>;
+  }
+
+  const handleLoanSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loanForm.userName.trim()) {
+      alert('Por favor ingresa tu nombre');
+      return;
+    }
+
+    const newLoan: Loan = {
+      id: uuidv4().toString(),
+      bookId: book.id,
+      userName: loanForm.userName,
+      loanDate: new Date().toISOString(),
+      status: 'active',
+    };
+
+    createLoan(newLoan);
+    alert('¡Préstamo registrado exitosamente!');
+    setIsLoanModalOpen(false);
+    setLoanForm({ userName: '' });
   };
 
   return (
@@ -41,8 +67,8 @@ export const BookDetailPage = () => {
           <header className="space-y-4">
             <div className="flex flex-wrap gap-2">
               <Badge variant="primary">{book.category}</Badge>
-              <Badge variant={book.available ? 'primary' : 'secondary'}>
-                {book.available ? 'Disponible' : 'Prestado'}
+              <Badge variant={book.available > 0 ? 'primary' : 'secondary'}>
+                {book.available > 0 ? 'Disponible' : 'Prestado'}
               </Badge>
             </div>
             <h1 className="text-4xl font-bold text-gray-900 leading-tight">{book.title}</h1>
@@ -74,10 +100,11 @@ export const BookDetailPage = () => {
           <footer className="flex gap-4 pt-4">
             <Button 
               className="flex-grow py-6 text-lg" 
-              disabled={!book.available}
-              variant={book.available ? 'primary' : 'secondary'}
+              disabled={book.available <= 0}
+              variant={book.available > 0 ? 'primary' : 'secondary'}
+              onClick={() => setIsLoanModalOpen(true)}
             >
-              {book.available ? 'Solicitar Préstamo' : 'Reservar para después'}
+              {book.available > 0 ? 'Solicitar Préstamo' : 'No disponible'}
             </Button>
             <Button variant="secondary" className="px-6">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
@@ -85,6 +112,45 @@ export const BookDetailPage = () => {
           </footer>
         </section>
       </div>
+
+      <Modal 
+        isOpen={isLoanModalOpen} 
+        onClose={() => {
+          setIsLoanModalOpen(false);
+          setLoanForm({ userName: '' });
+        }} 
+        title="Solicitar Préstamo"
+      >
+        <form onSubmit={handleLoanSubmit} className="space-y-4">
+          <div className="bg-gray-50 p-4 rounded-lg border border-secondary/10">
+            <p className="font-semibold">{book.title}</p>
+            <p className="text-sm text-secondary">{book.author}</p>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Tu Nombre</label>
+            <Input 
+              required
+              value={loanForm.userName}
+              onChange={(e) => setLoanForm({...loanForm, userName: e.target.value})}
+              placeholder="Nombre completo..."
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+            <Button 
+              type="button" 
+              variant="secondary" 
+              onClick={() => setIsLoanModalOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" variant="primary">
+              Confirmar Solicitud
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

@@ -7,6 +7,7 @@ import { useBooksStore } from '@/store/booksStore';
 import { useLoansStore, type Loan } from '@/store/loansStore';
 import { BookUp, CheckCircle2, Info } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 export const LoansPage = () => {
   const { loans, returnLoan, createLoan, cancelLoan } = useLoansStore();
@@ -125,32 +126,39 @@ export const LoansPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-secondary/5">
-                {loans.map((loan) => (
-                  <tr key={loan.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">{loan.bookTitle}</div>
-                      <div className="text-xs text-secondary">{loan.author}</div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600 hidden md:table-cell">{loan.user}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600 hidden md:table-cell">{loan.loanDate}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{loan.dueDate}</td>
-                    <td className="px-6 py-4 text-right">
-                      {getStatusBadge(loan.status)}
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex justify-center gap-2">
-                        <button onClick={() => handleDetailClick(loan)} className="p-1 text-gray-500 hover:text-primary transition-colors" title="Ver Detalle">
-                          <Info size={18} />
-                        </button>
-                        {loan.status !== 'returned' && (
-                          <button onClick={() => handleReturnClick(loan)} className="p-1 text-gray-500 hover:text-green-600 transition-colors" title="Marcar como Devuelto">
-                            <CheckCircle2 size={18} />
+                {loans.map((loan) => {
+                  const book = books.find(b => b.id === loan.bookId);
+                  const loanDateObj = new Date(loan.loanDate);
+                  const defaultDueDate = new Date(loanDateObj);
+                  defaultDueDate.setDate(defaultDueDate.getDate() + 14);
+
+                  return (
+                    <tr key={loan.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-gray-900">{book?.title || 'Libro Desconocido'}</div>
+                        <div className="text-xs text-secondary">{book?.author || 'Autor Desconocido'}</div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600 hidden md:table-cell">{loan.userName}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600 hidden md:table-cell">{loanDateObj.toLocaleDateString()}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{defaultDueDate.toLocaleDateString()}</td>
+                      <td className="px-6 py-4 text-right">
+                        {getStatusBadge(loan.status)}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex justify-center gap-2">
+                          <button onClick={() => handleDetailClick(loan)} className="p-1 text-gray-500 hover:text-primary transition-colors" title="Ver Detalle">
+                            <Info size={18} />
                           </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          {loan.status !== 'returned' && (
+                            <button onClick={() => handleReturnClick(loan)} className="p-1 text-gray-500 hover:text-green-600 transition-colors" title="Marcar como Devuelto">
+                              <CheckCircle2 size={18} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -159,7 +167,7 @@ export const LoansPage = () => {
 
       <Modal isOpen={isReturnModalOpen} onClose={() => setIsReturnModalOpen(false)} title="Confirmar Devolución">
         <div className="space-y-4">
-          <p>¿Estás seguro de que deseas marcar el libro <strong>{selectedLoan?.bookTitle}</strong> como devuelto?</p>
+          <p>¿Estás seguro de que deseas marcar el libro <strong>{selectedLoan && books.find(b => b.id === selectedLoan.bookId)?.title}</strong> como devuelto?</p>
           <div className="flex justify-end gap-3 pt-4">
             <Button variant="secondary" onClick={() => setIsReturnModalOpen(false)}>Cancelar</Button>
             <Button variant="primary" onClick={confirmReturn}>Confirmar</Button>
@@ -168,21 +176,28 @@ export const LoansPage = () => {
       </Modal>
 
       <Modal isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} title="Detalle del Préstamo">
-        {selectedLoan && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4 text-sm bg-gray-50 p-4 rounded-lg">
-              <div><span className="font-semibold block text-gray-500">Libro:</span> {selectedLoan.bookTitle}</div>
-              <div><span className="font-semibold block text-gray-500">Autor:</span> {selectedLoan.author}</div>
-              <div><span className="font-semibold block text-gray-500">Usuario:</span> {selectedLoan.userName}</div>
-              <div><span className="font-semibold block text-gray-500">Estado:</span> {selectedLoan.status}</div>
-              <div><span className="font-semibold block text-gray-500">Fecha de Préstamo:</span> {selectedLoan.loanDate}</div>
-              <div><span className="font-semibold block text-gray-500">Fecha Límite:</span> {selectedLoan.dueDate}</div>
+        {selectedLoan && (() => {
+          const book = books.find(b => b.id === selectedLoan.bookId);
+          const loanDateObj = new Date(selectedLoan.loanDate);
+          const defaultDueDate = new Date(loanDateObj);
+          defaultDueDate.setDate(defaultDueDate.getDate() + 14);
+
+          return (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-sm bg-gray-50 p-4 rounded-lg">
+                <div><span className="font-semibold block text-gray-500">Libro:</span> {book?.title || 'Desconocido'}</div>
+                <div><span className="font-semibold block text-gray-500">Autor:</span> {book?.author || 'Desconocido'}</div>
+                <div><span className="font-semibold block text-gray-500">Usuario:</span> {selectedLoan.userName}</div>
+                <div><span className="font-semibold block text-gray-500">Estado:</span> {selectedLoan.status}</div>
+                <div><span className="font-semibold block text-gray-500">Fecha de Préstamo:</span> {loanDateObj.toLocaleDateString()}</div>
+                <div><span className="font-semibold block text-gray-500">Fecha Límite:</span> {defaultDueDate.toLocaleDateString()}</div>
+              </div>
+              <div className="flex justify-end pt-4">
+                <Button variant="secondary" onClick={() => setIsDetailModalOpen(false)}>Cerrar</Button>
+              </div>
             </div>
-            <div className="flex justify-end pt-4">
-              <Button variant="secondary" onClick={() => setIsDetailModalOpen(false)}>Cerrar</Button>
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </Modal>
 
       <Modal isOpen={isNewLoanModalOpen} onClose={() => setIsNewLoanModalOpen(false)} title="Registrar Préstamo">
