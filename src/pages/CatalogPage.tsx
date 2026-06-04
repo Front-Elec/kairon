@@ -4,12 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { useBooksStore } from '@/store/booksStore';
-import { useLoansStore, type Loan } from '@/store/loansStore';
+import { useLoansStore } from '@/store/loansStore';
+import type { Loan } from '@/types/loan';
+import { useBookSearch, type AvailabilityFilter, type BookSortOption } from '@/hooks/useBookSearch';
 import { useCallback, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
 export const CatalogPage = () => {
   const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('all');
+  const [availability, setAvailability] = useState<AvailabilityFilter>('all');
+  const [sortBy, setSortBy] = useState<BookSortOption>('az');
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
   const [loanForm, setLoanForm] = useState({ userName: '' });
@@ -18,9 +24,15 @@ export const CatalogPage = () => {
   const { createLoan } = useLoansStore();
 
   /**
+   * Obtiene la lista única de categorías disponibles a partir de los libros reales.
+   */
+  const categories = useMemo(() => {
+    const unique = new Set(books.map((b) => b.category));
+    return Array.from(unique).filter(Boolean);
+  }, [books]);
+
+  /**
    * useCallback: estabiliza el handler del input entre renders.
-   * Sin esto, cada render crearía una nueva función, causando
-   * re-renders innecesarios en componentes hijos que la reciban como prop.
    */
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,19 +42,15 @@ export const CatalogPage = () => {
   );
 
   /**
-   * useMemo: el filtrado de la lista solo se recalcula cuando cambia
-   * el texto de búsqueda. Si el componente re-renderiza por otro motivo,
-   * la lista filtrada se reutiliza sin recomputar.
+   * Consume el motor de filtros y búsqueda (hook useBookSearch del Integrante 5)
    */
-  const filteredBooks = useMemo(() => {
-    const query = search.toLowerCase().trim();
-    if (!query) return books;
-    return books.filter(
-      (book) =>
-        book.title.toLowerCase().includes(query) ||
-        book.author.toLowerCase().includes(query)
-    );
-  }, [search, books]);
+  const filteredBooks = useBookSearch({
+    books,
+    searchText: search,
+    category,
+    availability,
+    sortBy,
+  });
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -64,14 +72,45 @@ export const CatalogPage = () => {
             aria-label="Buscar por título o autor"
           />
         </div>
-        <div className="flex gap-2 w-full md:w-auto">
-          {/* Placeholders para filtros extra (Integrante 5) */}
-          <div className="px-4 py-2 bg-gray-50 border border-secondary/10 rounded-md text-sm text-secondary cursor-not-allowed" aria-disabled="true">
-            Categoría
-          </div>
-          <div className="px-4 py-2 bg-gray-50 border border-secondary/10 rounded-md text-sm text-secondary cursor-not-allowed" aria-disabled="true">
-            Disponibilidad
-          </div>
+        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+          <select
+            id="category-filter"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="px-3 py-2 bg-white border border-secondary/20 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer"
+            aria-label="Filtrar por Categoría"
+          >
+            <option value="all">Todas las categorías</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat.toLowerCase()}>
+                {cat}
+              </option>
+            ))}
+          </select>
+
+          <select
+            id="availability-filter"
+            value={availability}
+            onChange={(e) => setAvailability(e.target.value as AvailabilityFilter)}
+            className="px-3 py-2 bg-white border border-secondary/20 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer"
+            aria-label="Filtrar por Disponibilidad"
+          >
+            <option value="all">Disponibilidad (Todas)</option>
+            <option value="available">Disponible</option>
+            <option value="unavailable">Prestado</option>
+          </select>
+
+          <select
+            id="sort-filter"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as BookSortOption)}
+            className="px-3 py-2 bg-white border border-secondary/20 rounded-md text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer"
+            aria-label="Ordenar por"
+          >
+            <option value="az">Título (A-Z)</option>
+            <option value="popularity">Más populares</option>
+            <option value="date">Más recientes</option>
+          </select>
         </div>
       </section>
 
@@ -94,16 +133,13 @@ export const CatalogPage = () => {
             <CardContent>
               <p className="text-sm font-medium text-gray-600 mb-4">{book.author}</p>
               <div className="pt-4 border-t border-secondary/5 flex justify-between items-center">
-                <button
+                <Link
+                  to={`/books/${book.id}`}
                   className="text-xs font-semibold text-primary hover:underline underline-offset-4"
-                  onClick={() => {
-                    setSelectedBook(book.id);
-                    setIsLoanModalOpen(true);
-                  }}
                   aria-label={`Ver detalles de ${book.title}`}
                 >
                   Ver detalles
-                </button>
+                </Link>
                 {book.available > 0 && (
                   <button
                     onClick={() => {
@@ -127,7 +163,7 @@ export const CatalogPage = () => {
         onClose={() => {
           setIsLoanModalOpen(false);
           setSelectedBook(null);
-          setLoanForm({ user: '', daysToReturn: '14' });
+          setLoanForm({ userName: '' });
         }} 
         title="Solicitar Préstamo"
       >

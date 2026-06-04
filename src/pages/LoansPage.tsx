@@ -4,19 +4,20 @@ import { Card, CardContent } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { useBooksStore } from '@/store/booksStore';
-import { useLoansStore, type Loan } from '@/store/loansStore';
+import { useLoansStore } from '@/store/loansStore';
+import type { Loan } from '@/types/loan';
 import { BookUp, CheckCircle2, Info } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 export const LoansPage = () => {
-  const { loans, returnLoan, createLoan, cancelLoan } = useLoansStore();
+  const { loans, returnLoan, createLoan } = useLoansStore();
   const { books } = useBooksStore();
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isNewLoanModalOpen, setIsNewLoanModalOpen] = useState(false);
-  const [newLoanForm, setNewLoanForm] = useState({ bookId: '', userName: '' });
+  const [newLoanForm, setNewLoanForm] = useState({ bookId: '', userName: '', dueDate: '' });
 
   const getStatusBadge = useCallback((status: Loan['status']) => {
     switch (status) {
@@ -80,7 +81,7 @@ export const LoansPage = () => {
 
     createLoan(newLoan);
     setIsNewLoanModalOpen(false);
-    setNewLoanForm({ bookId: '', userName: '' });
+    setNewLoanForm({ bookId: '', userName: '', dueDate: '' });
   };
 
   return (
