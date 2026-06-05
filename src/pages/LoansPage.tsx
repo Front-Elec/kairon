@@ -3,16 +3,18 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
-import { useBooksStore } from '@/store/booksStore';
-import { useLoansStore } from '@/store/loansStore';
+import { useBooksStore } from '../store/booksStore';
+import { useLoansStore } from '../store/loansStore';
 import type { Loan } from '@/types/loan';
 import { BookUp, CheckCircle2, Info } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 export const LoansPage = () => {
-  const { loans, returnLoan, createLoan } = useLoansStore();
-  const { books } = useBooksStore();
+  const loans = useLoansStore((state) => state.loans);
+  const createLoan = useLoansStore((state) => state.createLoan);
+  const returnLoan = useLoansStore((state) => state.returnLoan);
+  const books = useBooksStore((state) => state.books);
   const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null);
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
