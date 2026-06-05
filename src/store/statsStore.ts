@@ -1,14 +1,14 @@
 import { create } from 'zustand';
-import { useBookStore } from './bookStore';
-import { useLoanStore } from './loanStore';
+import type { Book } from '../types/book';
+import { useBooksStore } from './booksStore';
+import { useLoansStore } from './loansStore';
 
 export interface StatsData {
   totalBooks: number;
-  totalCopies: number;
-  availableCopies: number;
+  availableBooks: number;
   activeLoans: number;
   returnedLoans: number;
-  overdueLoans: number;
+  popularBooks: Book[];
   categoryDistribution: Array<{ name: string; count: number; fill: string }>;
   weeklyActivity: Array<{ name: string; activity: number }>;
   returnRate: number;
@@ -21,105 +21,108 @@ interface StatsStore {
   getStats: () => StatsData;
 }
 
-const categoryColors: Record<string, string> = {
-  'Literatura': '#6366f1',
-  'Novela': '#60a5fa',
-  'Infantil': '#f43f5e',
-  'Distopía': '#4ade80',
-  'Historia': '#f59e0b',
-  'Ciencia': '#8b5cf6',
-  'Tecnología': '#ec4899',
+const categoryColors = [
+  '#6366f1',
+  '#60a5fa',
+  '#f43f5e',
+  '#4ade80',
+  '#f59e0b',
+  '#8b5cf6',
+  '#ec4899',
+  '#06b6d4',
+];
+
+const emptyStats: StatsData = {
+  totalBooks: 0,
+  availableBooks: 0,
+  activeLoans: 0,
+  returnedLoans: 0,
+  popularBooks: [],
+  categoryDistribution: [],
+  weeklyActivity: [],
+  returnRate: 0,
+  avgLoanDuration: 0,
 };
 
-export const useStatsStore = create<StatsStore>((set, get) => ({
-  stats: {
-    totalBooks: 0,
-    totalCopies: 0,
-    availableCopies: 0,
-    activeLoans: 0,
-    returnedLoans: 0,
-    overdueLoans: 0,
-    categoryDistribution: [],
-    weeklyActivity: [],
-    returnRate: 0,
-    avgLoanDuration: 0,
-  },
+const buildStats = (): StatsData => {
+  const books = useBooksStore.getState().books;
+  const loans = useLoansStore.getState().loans;
 
-  calculateStats: () => {
-    const books = useBookStore.getState().books;
-    const loans = useLoanStore.getState().loans;
+  const totalBooks = books.length;
+  const availableBooks = books.reduce((sum, book) => sum + book.available, 0);
+  const activeLoans = loans.filter((loan) => loan.status === 'active').length;
+  const returnedLoans = loans.filter((loan) => loan.status === 'returned').length;
+  const popularBooks = [...books].sort((a, b) => b.popularity - a.popularity);
 
-    // Estadísticas básicas
-    const totalBooks = books.length;
-    const totalCopies = books.reduce((sum, book) => sum + book.quantity, 0);
-    const availableCopies = books.reduce((sum, book) => sum + book.available, 0);
+  const categoryMap = new Map<string, number>();
+  books.forEach((book) => {
+    categoryMap.set(book.category, (categoryMap.get(book.category) || 0) + 1);
+  });
 
-    // Estadísticas de préstamos
-    const activeLoans = loans.filter(l => l.status === 'active').length;
-    const returnedLoans = loans.filter(l => l.status === 'returned').length;
-    const overdueLoans = loans.filter(l => l.status === 'overdue').length;
-
-    // Distribución por categoría
-    const categoryMap = new Map<string, number>();
-    books.forEach((book) => {
-      categoryMap.set(book.category, (categoryMap.get(book.category) || 0) + book.quantity);
-    });
-
-    const categoryDistribution = Array.from(categoryMap.entries()).map(([name, count]) => ({
+  const categoryDistribution = Array.from(categoryMap.entries()).map(
+    ([name, count], index) => ({
       name,
       count,
-      fill: categoryColors[name] || '#6366f1',
-    }));
+      fill: categoryColors[index % categoryColors.length],
+    })
+  );
 
-    // Actividad semanal (simulado - en realidad usaría timestamps)
-    const weeklyActivity = [
-      { name: 'L', activity: Math.floor(Math.random() * 100) + 20 },
-      { name: 'M', activity: Math.floor(Math.random() * 100) + 20 },
-      { name: 'X', activity: Math.floor(Math.random() * 100) + 20 },
-      { name: 'J', activity: Math.floor(Math.random() * 100) + 20 },
-      { name: 'V', activity: Math.floor(Math.random() * 100) + 20 },
-      { name: 'S', activity: Math.floor(Math.random() * 100) + 20 },
-      { name: 'D', activity: Math.floor(Math.random() * 100) + 20 },
-    ];
+  const days = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'];
+  const activityMap = new Map(days.map((day) => [day, 0]));
+  loans.forEach((loan) => {
+    const dayName = days[new Date(loan.loanDate).getDay()];
+    activityMap.set(dayName, (activityMap.get(dayName) || 0) + 1);
+  });
 
-    // Tasa de retorno
-    const totalLoansProcessed = returnedLoans + overdueLoans;
-    const returnRate = totalLoansProcessed > 0 
-      ? Math.round((returnedLoans / totalLoansProcessed) * 100) 
-      : 0;
+  const weeklyActivity = Array.from(activityMap).map(([name, activity]) => ({
+    name,
+    activity,
+  }));
 
-    // Duración promedio de préstamos
-    let totalDays = 0;
-    let completedLoans = 0;
-    loans.forEach((loan) => {
-      if (loan.returnDate) {
-        const loanDate = new Date(loan.loanDate);
-        const returnDate = new Date(loan.returnDate);
-        const days = Math.floor((returnDate.getTime() - loanDate.getTime()) / (1000 * 60 * 60 * 24));
-        totalDays += days;
-        completedLoans++;
-      }
+  const returnRate = loans.length > 0
+    ? Math.round((returnedLoans / loans.length) * 100)
+    : 0;
+
+  const returnedDurations = loans
+    .filter((loan) => loan.returnDate)
+    .map((loan) => {
+      const loanDate = new Date(loan.loanDate);
+      const returnDate = new Date(loan.returnDate!);
+      return Math.floor(
+        (returnDate.getTime() - loanDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
     });
-    const avgLoanDuration = completedLoans > 0 ? Math.round(totalDays / completedLoans) : 0;
 
-    const stats: StatsData = {
-      totalBooks,
-      totalCopies,
-      availableCopies,
-      activeLoans,
-      returnedLoans,
-      overdueLoans,
-      categoryDistribution,
-      weeklyActivity,
-      returnRate,
-      avgLoanDuration,
-    };
+  const avgLoanDuration = returnedDurations.length > 0
+    ? Math.round(
+        returnedDurations.reduce((sum, daysOnLoan) => sum + daysOnLoan, 0) /
+          returnedDurations.length
+      )
+    : 0;
 
-    set({ stats });
+  return {
+    totalBooks,
+    availableBooks,
+    activeLoans,
+    returnedLoans,
+    popularBooks,
+    categoryDistribution,
+    weeklyActivity,
+    returnRate,
+    avgLoanDuration,
+  };
+};
+
+export const useStatsStore = create<StatsStore>((set) => ({
+  stats: emptyStats,
+
+  calculateStats: () => {
+    set({ stats: buildStats() });
   },
 
   getStats: () => {
-    get().calculateStats();
-    return get().stats;
+    const stats = buildStats();
+    set({ stats });
+    return stats;
   },
 }));
