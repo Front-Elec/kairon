@@ -13,13 +13,13 @@ import { v4 as uuidv4 } from 'uuid';
 export const BookDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { books } = useBooksStore();
+  const books = useBooksStore((state) => state.books);
   const { createLoan } = useLoansStore();
 
   const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
   const [loanForm, setLoanForm] = useState({ userName: '' });
 
-  const book = books.find(b => b.id === id);
+  const book = books.find((item) => item.id === id);
 
   if (!book) {
     return (
@@ -33,7 +33,7 @@ export const BookDetailPage = () => {
         </div>
         <div className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">Libro no encontrado</h1>
-          <p className="text-secondary text-base">Lo sentimos, no pudimos encontrar el libro que buscas en nuestro catálogo.</p>
+          <p className="text-secondary text-base">El libro solicitado no existe o fue eliminado.</p>
           <p className="text-sm text-gray-400">Es posible que el identificador sea incorrecto o que el libro haya sido retirado de nuestra colección digital.</p>
         </div>
         <Button onClick={() => navigate('/')} className="px-8 py-3 w-full sm:w-auto">
