@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { useBookStore } from './bookStore';
+import { useBooksStore } from './booksStore';
 import { useLoanStore } from './loanStore';
 
 export interface StatsData {
@@ -46,7 +46,7 @@ export const useStatsStore = create<StatsStore>((set, get) => ({
   },
 
   calculateStats: () => {
-    const books = useBookStore.getState().books;
+    const books = useBooksStore.getState().books;
     const loans = useLoanStore.getState().loans;
 
     // Estadísticas básicas
