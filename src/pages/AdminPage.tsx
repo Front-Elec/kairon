@@ -146,6 +146,7 @@ export const AdminPage = () => {
       >
         <BookForm 
           initialData={editingBook} 
+          editingId={editingBookId}
           onSubmit={handleFormSubmit} 
           onCancel={() => setIsModalOpen(false)} 
         />

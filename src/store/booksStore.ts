@@ -115,7 +115,9 @@ interface BooksStore {
 
   deleteBook: (id: string) => void;
 
-  isIsbnDuplicate: (isbn: string, exclusionId?: string) => boolean;
+  /** Devuelve true si el ISBN ya existe en otro libro.
+   *  En modo edición pasar el id del libro actual para excluirlo. */
+  isIsbnDuplicate: (isbn: string, excludeId?: string) => boolean;
 }
 
 export const useBooksStore =
@@ -152,13 +154,13 @@ export const useBooksStore =
             ),
           })),
 
-        isIsbnDuplicate: (isbn, exclusionId) => {
+        isIsbnDuplicate: (isbn, excludeId) => {
           const normalizedIsbn = isbn.replace(/[-\s]/g, "").toLowerCase();
 
           return get().books.some((book) => {
             const bookIsbn = book.isbn.replace(/[-\s]/g, "").toLowerCase();
 
-            if (exclusionId && book.id === exclusionId) {
+            if (excludeId && book.id === excludeId) {
               return false;
             }
 
