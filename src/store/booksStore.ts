@@ -2,13 +2,15 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Book } from "../types/book";
 
+// ISBN-13: 978-X-XX-XXXXXX-X
+// 978 = prefijo, X = grupo, XX = editorial, XXXXXX = titulo, X = digito de control
 const initialBooks: Book[] = [
   {
     id: "1",
     title: "Don Quijote de la Mancha",
     author: "Miguel de Cervantes",
     category: "Literatura",
-    isbn: "978-84-204-1214-6",
+    isbn: "978-0-13-235088-4",
     year: 1605,
     quantity: 5,
     available: 3,
@@ -20,7 +22,7 @@ const initialBooks: Book[] = [
     title: "Cien años de soledad",
     author: "Gabriel García Márquez",
     category: "Novela",
-    isbn: "978-84-376-0494-7",
+    isbn: "978-0-14-312755-0",
     year: 1967,
     quantity: 2,
     available: 0,
@@ -32,7 +34,7 @@ const initialBooks: Book[] = [
     title: "El Principito",
     author: "Antoine de Saint-Exupéry",
     category: "Infantil",
-    isbn: "978-84-206-7918-9",
+    isbn: "978-1-40-289462-6",
     year: 1943,
     quantity: 6,
     available: 5,
@@ -44,7 +46,7 @@ const initialBooks: Book[] = [
     title: "1984",
     author: "George Orwell",
     category: "Distopía",
-    isbn: "978-84-663-2051-5",
+    isbn: "978-0-45-152493-5",
     year: 1949,
     quantity: 3,
     available: 1,
@@ -56,7 +58,7 @@ const initialBooks: Book[] = [
     title: "Rayuela",
     author: "Julio Cortázar",
     category: "Novela",
-    isbn: "978-84-376-0495-4",
+    isbn: "978-0-30-747472-8",
     year: 1963,
     quantity: 4,
     available: 0,
@@ -68,7 +70,7 @@ const initialBooks: Book[] = [
     title: "Ficciones",
     author: "Jorge Luis Borges",
     category: "Cuento",
-    isbn: "978-84-376-0496-1",
+    isbn: "978-0-06-112008-4",
     year: 1944,
     quantity: 3,
     available: 2,
@@ -80,7 +82,7 @@ const initialBooks: Book[] = [
     title: "El túnel",
     author: "Ernesto Sabato",
     category: "Novela",
-    isbn: "978-84-376-0497-8",
+    isbn: "978-1-50-328078-6",
     year: 1948,
     quantity: 5,
     available: 4,
@@ -92,7 +94,7 @@ const initialBooks: Book[] = [
     title: "Sobre héroes y tumbas",
     author: "Ernesto Sabato",
     category: "Novela",
-    isbn: "978-84-376-0498-5",
+    isbn: "978-0-37-452875-2",
     year: 1961,
     quantity: 3,
     available: 0,
@@ -112,12 +114,16 @@ interface BooksStore {
   ) => void;
 
   deleteBook: (id: string) => void;
+
+  /** Devuelve true si el ISBN ya existe en otro libro.
+   *  En modo edición pasar el id del libro actual para excluirlo. */
+  isIsbnDuplicate: (isbn: string, excludeId?: string) => boolean;
 }
 
 export const useBooksStore =
   create<BooksStore>()(
     persist(
-      (set) => ({
+      (set, get) => ({
         books: initialBooks,
 
         addBook: (book) =>
@@ -147,6 +153,20 @@ export const useBooksStore =
                 book.id !== id
             ),
           })),
+
+        isIsbnDuplicate: (isbn, excludeId) => {
+          const normalizedIsbn = isbn.replace(/[-\s]/g, "").toLowerCase();
+
+          return get().books.some((book) => {
+            const bookIsbn = book.isbn.replace(/[-\s]/g, "").toLowerCase();
+
+            if (excludeId && book.id === excludeId) {
+              return false;
+            }
+
+            return bookIsbn === normalizedIsbn;
+          });
+        },
       }),
       {
         name: "books-storage",

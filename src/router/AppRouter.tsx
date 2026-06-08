@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import { Navbar } from '../components/layout/Navbar';
 import { PageLoader } from '../components/ui/PageLoader';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 
 // Cada página se carga como chunk separado (code splitting)
 const CatalogPage = lazy(() =>
@@ -22,6 +23,9 @@ const StatsPage = lazy(() =>
 const NotFoundPage = lazy(() =>
   import('../pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage }))
 );
+const LoginPage = lazy(() =>
+  import('../pages/LoginPage').then((m) => ({ default: m.LoginPage }))
+);
 
 /**
  * RootLayout envuelve todas las rutas hijas con un único <Suspense>.
@@ -39,10 +43,23 @@ const RootLayout = () => (
   </div>
 );
 
+const AuthLayout = () => (
+  <Suspense fallback={<PageLoader />}>
+    <Outlet />
+  </Suspense>
+);
+
 const router = createBrowserRouter([
   {
+    path: '/login',
+    element: <AuthLayout />,
+    children: [
+      { index: true, element: <LoginPage /> },
+    ],
+  },
+  {
     path: '/',
-    element: <RootLayout />,
+    element: <ProtectedRoute />,
     // NotFoundPage también es lazy; necesita su propio Suspense porque
     // el errorElement se renderiza fuera del árbol de RootLayout.
     errorElement: (
@@ -51,11 +68,21 @@ const router = createBrowserRouter([
       </Suspense>
     ),
     children: [
-      { index: true,          element: <CatalogPage /> },
-      { path: 'books/:id',    element: <BookDetailPage /> },
-      { path: 'loans',        element: <LoansPage /> },
-      { path: 'admin',        element: <AdminPage /> },
-      { path: 'stats',        element: <StatsPage /> },
+      {
+        element: <RootLayout />,
+        children: [
+          { index: true, element: <CatalogPage /> },
+          { path: 'books/:id', element: <BookDetailPage /> },
+          {
+            element: <ProtectedRoute requiredRole="admin" />,
+            children: [
+              { path: 'loans', element: <LoansPage /> },
+              { path: 'admin', element: <AdminPage /> },
+              { path: 'stats', element: <StatsPage /> },
+            ],
+          },
+        ],
+      },
     ],
   },
 ]);
