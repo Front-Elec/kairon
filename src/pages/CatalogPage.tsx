@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback, type ChangeEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -23,6 +24,7 @@ const sortOptions: { value: BookSortOption; label: string }[] = [
 ];
 
 export const CatalogPage = () => {
+  const navigate = useNavigate();
   const { books } = useBooksStore();
   const { createLoan } = useLoansStore();
   const [searchText, setSearchText] = useState('');
@@ -171,6 +173,7 @@ export const CatalogPage = () => {
                   <button
                     className="text-xs font-semibold text-primary hover:underline underline-offset-4"
                     aria-label={`Ver detalles de ${book.title}`}
+                    onClick={() => navigate(`/books/${book.id}`)}
                   >
                     Ver detalles
                   </button>
