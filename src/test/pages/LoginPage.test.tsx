@@ -5,6 +5,9 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { LoginPage } from "@/pages/LoginPage";
 import { useAuthStore } from "@/store/authStore";
 
+const getPasswordInput = () =>
+  screen.getByLabelText(/contraseña/i, { selector: "input" });
+
 describe("LoginPage", () => {
   beforeEach(() => {
     localStorage.clear();
@@ -22,8 +25,8 @@ describe("LoginPage", () => {
       </MemoryRouter>
     );
 
-    await user.type(screen.getByLabelText(/usuario/i), "admin");
-    await user.type(screen.getByLabelText(/contraseña/i), "fallida");
+    await user.type(screen.getByLabelText(/correo/i), "admin@kairon.com");
+    await user.type(getPasswordInput(), "fallida");
     await user.click(screen.getByRole("button", { name: /ingresar/i }));
 
     expect(useAuthStore.getState().session).toBeNull();
@@ -44,8 +47,8 @@ describe("LoginPage", () => {
       </MemoryRouter>
     );
 
-    await user.type(screen.getByLabelText(/usuario/i), "admin");
-    await user.type(screen.getByLabelText(/contraseña/i), "admin123");
+    await user.type(screen.getByLabelText(/correo/i), "admin@kairon.com");
+    await user.type(getPasswordInput(), "admin123");
     await user.click(screen.getByRole("button", { name: /ingresar/i }));
 
     expect(useAuthStore.getState().session).toEqual({
@@ -66,12 +69,12 @@ describe("LoginPage", () => {
       </MemoryRouter>
     );
 
-    await user.type(screen.getByLabelText(/usuario/i), "usuario");
-    await user.type(screen.getByLabelText(/contraseña/i), "usuario123");
+    await user.type(screen.getByLabelText(/correo/i), "usuario1@kairon.com");
+    await user.type(getPasswordInput(), "usuario123");
     await user.click(screen.getByRole("button", { name: /ingresar/i }));
 
     expect(useAuthStore.getState().session).toEqual({
-      username: "usuario",
+      username: "Laura",
       role: "usuario",
     });
   });
@@ -92,10 +95,32 @@ describe("LoginPage", () => {
       </MemoryRouter>
     );
 
-    await user.type(screen.getByLabelText(/usuario/i), "admin");
-    await user.type(screen.getByLabelText(/contraseña/i), "admin123");
+    await user.type(screen.getByLabelText(/correo/i), "admin@kairon.com");
+    await user.type(getPasswordInput(), "admin123");
     await user.click(screen.getByRole("button", { name: /ingresar/i }));
 
     expect(screen.getByText("Panel administrativo")).toBeInTheDocument();
+  });
+
+  it("permite mostrar y ocultar la contraseña", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    const passwordInput = getPasswordInput();
+
+    expect(passwordInput).toHaveAttribute("type", "password");
+
+    await user.click(screen.getByRole("button", { name: /mostrar contraseña/i }));
+    expect(passwordInput).toHaveAttribute("type", "text");
+
+    await user.click(screen.getByRole("button", { name: /ocultar contraseña/i }));
+    expect(passwordInput).toHaveAttribute("type", "password");
   });
 });

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
+import { useAuthStore } from '@/store/authStore';
 import { useBooksStore } from '@/store/booksStore';
 import { useLoansStore } from '@/store/loansStore';
 import type { Loan } from '@/types/loan';
@@ -27,13 +28,13 @@ export const CatalogPage = () => {
   const navigate = useNavigate();
   const { books } = useBooksStore();
   const { createLoan } = useLoansStore();
+  const session = useAuthStore((state) => state.session);
   const [searchText, setSearchText] = useState('');
   const [category, setCategory] = useState('all');
   const [availability, setAvailability] = useState<AvailabilityFilter>('all');
   const [sortBy, setSortBy] = useState<BookSortOption>('az');
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
-  const [loanForm, setLoanForm] = useState({ userName: '' });
 
   const categories = useMemo(() => {
     const unique = Array.from(new Set(books.map((book) => book.category))).sort();
@@ -206,7 +207,6 @@ export const CatalogPage = () => {
         onClose={() => {
           setIsLoanModalOpen(false);
           setSelectedBook(null);
-          setLoanForm({ userName: '' });
         }}
         title="Solicitar Préstamo"
       >
@@ -216,15 +216,15 @@ export const CatalogPage = () => {
 
           const handleSubmit = (e: React.FormEvent) => {
             e.preventDefault();
-            if (!loanForm.userName.trim()) {
-              alert('Por favor ingresa tu nombre');
+            if (!session?.username) {
+              alert('No se pudo identificar al usuario actual');
               return;
             }
 
             const newLoan: Loan = {
               id: uuidv4().toString(),
               bookId: book.id,
-              userName: loanForm.userName,
+              userName: session.username,
               loanDate: new Date().toISOString(),
               status: 'active',
             };
@@ -233,7 +233,6 @@ export const CatalogPage = () => {
             alert('¡Préstamo registrado exitosamente!');
             setIsLoanModalOpen(false);
             setSelectedBook(null);
-            setLoanForm({ userName: '' });
           };
 
           return (
@@ -243,14 +242,9 @@ export const CatalogPage = () => {
                 <p className="text-sm text-secondary">{book.author}</p>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Tu Nombre</label>
-                <Input
-                  required
-                  value={loanForm.userName}
-                  onChange={(e) => setLoanForm({ ...loanForm, userName: e.target.value })}
-                  placeholder="Nombre completo..."
-                />
+              <div className="rounded-lg border border-secondary/10 bg-primary/5 px-4 py-3 text-sm text-secondary">
+                Este préstamo quedará registrado a nombre de{' '}
+                <span className="font-semibold text-gray-900">{session?.username}</span>.
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">

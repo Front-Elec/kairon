@@ -12,7 +12,7 @@ describe("Navbar", () => {
 
   it("oculta las rutas de admin para un usuario estándar", () => {
     useAuthStore.setState({
-      session: { username: "usuario", role: "usuario" },
+      session: { username: "Laura", role: "usuario" },
       hasHydrated: true,
     });
 
@@ -22,8 +22,10 @@ describe("Navbar", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getAllByText("usuario")).toHaveLength(2);
+    expect(screen.getByText("Laura")).toBeInTheDocument();
+    expect(screen.getAllByText("usuario")).toHaveLength(1);
     expect(screen.getByText("Catálogo")).toBeInTheDocument();
+    expect(screen.getByText("Libros solicitados")).toBeInTheDocument();
     expect(screen.queryByText("Préstamos")).not.toBeInTheDocument();
     expect(screen.queryByText("Admin")).not.toBeInTheDocument();
     expect(screen.queryByText("Estadísticas")).not.toBeInTheDocument();

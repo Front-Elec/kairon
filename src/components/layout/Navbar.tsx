@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/store/authStore';
 
@@ -14,6 +13,13 @@ export const Navbar = () => {
       const commonLinks = [
         { to: '/', label: 'Catálogo' },
       ];
+
+      if (session?.role === 'usuario') {
+        return [
+          ...commonLinks,
+          { to: '/my-loans', label: 'Libros solicitados' },
+        ];
+      }
 
       if (session?.role === 'admin') {
         return [
@@ -41,7 +47,16 @@ export const Navbar = () => {
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <span className="text-white font-bold">K</span>
           </div>
-          <span className="text-xl font-bold text-gray-900">Kairon</span>
+          {session ? (
+            <div className="flex flex-col">
+              <span className="text-xl font-bold text-gray-900">{session.username}</span>
+              <span className="text-xs font-medium uppercase tracking-wide text-secondary">
+                {session.role}
+              </span>
+            </div>
+          ) : (
+            <span className="text-xl font-bold text-gray-900">Kairon</span>
+          )}
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
@@ -62,11 +77,7 @@ export const Navbar = () => {
           </div>
 
           {session ? (
-            <div className="flex flex-wrap items-center gap-3 sm:justify-end">
-              <span className="text-sm font-medium text-gray-700">{session.username}</span>
-              <Badge variant={session.role === 'admin' ? 'accent' : 'secondary'}>
-                {session.role}
-              </Badge>
+            <div className="flex items-center gap-3 sm:justify-end">
               <Button type="button" variant="secondary" onClick={handleLogout} className="text-sm">
                 Cerrar sesión
               </Button>
