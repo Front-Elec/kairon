@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
+import { useAuthStore } from '@/store/authStore';
 import { useBooksStore } from '@/store/booksStore';
 import { useLoansStore } from '@/store/loansStore';
 import type { Loan } from '@/types/loan';
@@ -15,9 +15,9 @@ export const BookDetailPage = () => {
   const navigate = useNavigate();
   const books = useBooksStore((state) => state.books);
   const { createLoan } = useLoansStore();
+  const session = useAuthStore((state) => state.session);
 
   const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
-  const [loanForm, setLoanForm] = useState({ userName: '' });
 
   const book = books.find((item) => item.id === id);
 
@@ -45,15 +45,15 @@ export const BookDetailPage = () => {
 
   const handleLoanSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!loanForm.userName.trim()) {
-      alert('Por favor ingresa tu nombre');
+    if (!session?.username) {
+      alert('No se pudo identificar al usuario actual');
       return;
     }
 
     const newLoan: Loan = {
       id: uuidv4().toString(),
       bookId: book.id,
-      userName: loanForm.userName,
+      userName: session.username,
       loanDate: new Date().toISOString(),
       status: 'active',
     };
@@ -61,7 +61,6 @@ export const BookDetailPage = () => {
     createLoan(newLoan);
     alert('¡Préstamo registrado exitosamente!');
     setIsLoanModalOpen(false);
-    setLoanForm({ userName: '' });
   };
 
   return (
@@ -157,7 +156,6 @@ export const BookDetailPage = () => {
         isOpen={isLoanModalOpen} 
         onClose={() => {
           setIsLoanModalOpen(false);
-          setLoanForm({ userName: '' });
         }} 
         title="Solicitar Préstamo"
       >
@@ -167,14 +165,9 @@ export const BookDetailPage = () => {
             <p className="text-sm text-secondary">{book.author}</p>
           </div>
           
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Tu Nombre</label>
-            <Input 
-              required
-              value={loanForm.userName}
-              onChange={(e) => setLoanForm({...loanForm, userName: e.target.value})}
-              placeholder="Nombre completo..."
-            />
+          <div className="rounded-lg border border-secondary/10 bg-primary/5 px-4 py-3 text-sm text-secondary">
+            Este préstamo quedará registrado a nombre de{' '}
+            <span className="font-semibold text-gray-900">{session?.username}</span>.
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">

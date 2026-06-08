@@ -18,26 +18,47 @@ const EXAMPLE_LOANS: Loan[] = [
   {
     id: "loan-1",
     bookId: "1",
-    userName: "Juan García",
+    userName: "Laura",
     loanDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     status: "active",
   },
   {
     id: "loan-2",
     bookId: "3",
-    userName: "María López",
+    userName: "Laura",
     loanDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     status: "active",
   },
   {
     id: "loan-3",
     bookId: "2",
-    userName: "Carlos Rodríguez",
+    userName: "Laura",
     loanDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
     returnDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     status: "returned",
   },
+  {
+    id: "loan-4",
+    bookId: "4",
+    userName: "Mateo",
+    loanDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    status: "active",
+  },
+  {
+    id: "loan-5",
+    bookId: "6",
+    userName: "Mateo",
+    loanDate: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString(),
+    returnDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    status: "returned",
+  },
 ];
+
+const LEGACY_EXAMPLE_USERS = new Set([
+  "Juan García",
+  "María López",
+  "Carlos Rodríguez",
+]);
 
 export const useLoansStore = create<LoansStore>()(
   persist(
@@ -110,6 +131,35 @@ export const useLoansStore = create<LoansStore>()(
     }),
     {
       name: "loans-storage",
+      version: 3,
+      migrate: (persistedState) => {
+        const state = persistedState as Partial<LoansStore> | undefined;
+
+        if (!state?.loans) {
+          return {
+            loans: EXAMPLE_LOANS,
+          };
+        }
+
+        const mappedLoans = state.loans.map((loan) => {
+          if (LEGACY_EXAMPLE_USERS.has(loan.userName)) {
+            return { ...loan, userName: "Laura" };
+          }
+
+          return loan;
+        });
+
+        const hasLauraLoans = mappedLoans.some((loan) => loan.userName === "Laura");
+        const hasMateoLoans = mappedLoans.some((loan) => loan.userName === "Mateo");
+
+        return {
+          ...state,
+          loans:
+            hasLauraLoans && hasMateoLoans
+              ? mappedLoans
+              : EXAMPLE_LOANS,
+        };
+      },
     }
   )
 );
