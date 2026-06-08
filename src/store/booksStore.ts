@@ -112,12 +112,14 @@ interface BooksStore {
   ) => void;
 
   deleteBook: (id: string) => void;
+
+  isIsbnDuplicate: (isbn: string, exclusionId?: string) => boolean;
 }
 
 export const useBooksStore =
   create<BooksStore>()(
     persist(
-      (set) => ({
+      (set, get) => ({
         books: initialBooks,
 
         addBook: (book) =>
@@ -147,6 +149,20 @@ export const useBooksStore =
                 book.id !== id
             ),
           })),
+
+        isIsbnDuplicate: (isbn, exclusionId) => {
+          const normalizedIsbn = isbn.replace(/[-\s]/g, "").toLowerCase();
+
+          return get().books.some((book) => {
+            const bookIsbn = book.isbn.replace(/[-\s]/g, "").toLowerCase();
+
+            if (exclusionId && book.id === exclusionId) {
+              return false;
+            }
+
+            return bookIsbn === normalizedIsbn;
+          });
+        },
       }),
       {
         name: "books-storage",
