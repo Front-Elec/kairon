@@ -10,9 +10,11 @@ export interface AuthSession {
 
 interface AuthStore {
   session: AuthSession | null;
+  hasHydrated: boolean;
   login: (username: string, password: string) => boolean;
   logout: () => void;
   isAdmin: () => boolean;
+  setHasHydrated: (value: boolean) => void;
 }
 
 const credentials: Record<
@@ -42,6 +44,7 @@ export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
       session: null,
+      hasHydrated: false,
 
       login: (username, password) => {
         const credential = credentials[username];
@@ -59,12 +62,18 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       isAdmin: () => get().session?.role === "admin",
+      setHasHydrated: (value) => {
+        set({ hasHydrated: value });
+      },
     }),
     {
       name: "auth-storage",
       partialize: (state) => ({
         session: state.session,
       }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );
