@@ -26,9 +26,54 @@ describe("LoginPage", () => {
     await user.type(screen.getByLabelText(/contraseña/i), "fallida");
     await user.click(screen.getByRole("button", { name: /ingresar/i }));
 
+    expect(useAuthStore.getState().session).toBeNull();
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Credenciales incorrectas. Verifica tu usuario y contraseña."
     );
+  });
+
+  it("actualiza el store con role admin cuando las credenciales son correctas", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<p>Catálogo</p>} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    await user.type(screen.getByLabelText(/usuario/i), "admin");
+    await user.type(screen.getByLabelText(/contraseña/i), "admin123");
+    await user.click(screen.getByRole("button", { name: /ingresar/i }));
+
+    expect(useAuthStore.getState().session).toEqual({
+      username: "admin",
+      role: "admin",
+    });
+  });
+
+  it("actualiza el store con role usuario cuando las credenciales son correctas", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<p>Catálogo</p>} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    await user.type(screen.getByLabelText(/usuario/i), "usuario");
+    await user.type(screen.getByLabelText(/contraseña/i), "usuario123");
+    await user.click(screen.getByRole("button", { name: /ingresar/i }));
+
+    expect(useAuthStore.getState().session).toEqual({
+      username: "usuario",
+      role: "usuario",
+    });
   });
 
   it("redirige al destino original después de iniciar sesión", async () => {

@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it } from "vitest";
 import { Navbar } from "@/components/layout/Navbar";
@@ -45,5 +46,24 @@ describe("Navbar", () => {
     expect(screen.getByText("Admin")).toBeInTheDocument();
     expect(screen.getByText("Estadísticas")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /cerrar sesión/i })).toBeInTheDocument();
+  });
+
+  it("cierra la sesión y limpia el store al hacer logout", async () => {
+    const user = userEvent.setup();
+
+    useAuthStore.setState({
+      session: { username: "admin", role: "admin" },
+      hasHydrated: true,
+    });
+
+    render(
+      <MemoryRouter>
+        <Navbar />
+      </MemoryRouter>
+    );
+
+    await user.click(screen.getByRole("button", { name: /cerrar sesión/i }));
+
+    expect(useAuthStore.getState().session).toBeNull();
   });
 });
