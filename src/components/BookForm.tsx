@@ -61,6 +61,11 @@ export const BookForm: React.FC<BookFormProps> = ({
     [isbnDigits]
   );
 
+  const showIsbnFormatError = useMemo(
+    () => formData.isbn.length > 0 && !isbnLengthValid,
+    [formData.isbn, isbnLengthValid]
+  );
+
   // Consulta en tiempo real al selector del store; excluye el libro en edición
   const isDuplicate = useMemo(
     () => isbnLengthValid && isIsbnDuplicate(formData.isbn, editingId),
@@ -136,12 +141,17 @@ export const BookForm: React.FC<BookFormProps> = ({
             value={formData.isbn}
             onChange={handleChange}
             placeholder="Ej: 978-84-376-0494-7"
-            className={isDuplicate ? 'border-red-400 focus:ring-red-300' : ''}
+            className={
+              isDuplicate || showIsbnFormatError ? 'border-red-400 focus:ring-red-300' : ''
+            }
           />
           {isDuplicate && (
             <p className="text-xs text-red-500">Este ISBN ya está registrado</p>
           )}
-          {!isDuplicate && errors.isbn && (
+          {!isDuplicate && showIsbnFormatError && (
+            <p className="text-xs text-red-500">ISBN inválido (10 o 13 dígitos)</p>
+          )}
+          {!isDuplicate && !showIsbnFormatError && errors.isbn && (
             <p className="text-xs text-red-500">{errors.isbn}</p>
           )}
         </div>

@@ -1,10 +1,30 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
-// import { BookForm } from 'src/components/BookForm'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { BookForm } from "../../components/BookForm"
+import { useBooksStore } from '../../store/booksStore'
+import type { Book } from '../../types/book'
+
+const makeBook = (overrides: Partial<Book> = {}): Book => ({
+  id: 'book-1',
+  title: 'Rayuela',
+  author: 'Julio Cortázar',
+  category: 'Novela',
+  isbn: '978-1-23-456789-7',
+  year: 1963,
+  quantity: 3,
+  available: 3,
+  createdAt: '2026-06-08T00:00:00.000Z',
+  popularity: 10,
+  ...overrides,
+})
 
 describe('BookForm', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    useBooksStore.setState({ books: [] })
+  })
+
   it('renderiza los campos principales del formulario', () => {
     render(<BookForm onSubmit={vi.fn()} onCancel={vi.fn()} />)
 
@@ -70,5 +90,100 @@ describe('BookForm', () => {
     await user.click(screen.getByRole('button', { name: /cancelar/i }))
 
     expect(onCancel).toHaveBeenCalledTimes(1)
+  })
+
+  it('muestra error de ISBN duplicado y bloquea el submit', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn()
+
+    useBooksStore.setState({
+      books: [makeBook()],
+    })
+
+    render(<BookForm onSubmit={onSubmit} onCancel={vi.fn()} />)
+
+    await user.type(screen.getByPlaceholderText('Ej: Rayuela'), 'Nuevo libro')
+    await user.type(screen.getByPlaceholderText('Ej: Julio Cortázar'), 'Otra autora')
+    await user.type(screen.getByPlaceholderText('Ej: Novela'), 'Ensayo')
+    await user.type(screen.getByPlaceholderText('Ej: 978-84-376-0494-7'), '9781234567897')
+
+    expect(screen.getByText('Este ISBN ya está registrado')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /registrar libro/i })).toBeDisabled()
+
+    await user.click(screen.getByRole('button', { name: /registrar libro/i }))
+
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it('permite enviar el formulario cuando el ISBN no está duplicado', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn()
+
+    useBooksStore.setState({
+      books: [makeBook()],
+    })
+
+    render(<BookForm onSubmit={onSubmit} onCancel={vi.fn()} />)
+
+    await user.type(screen.getByPlaceholderText('Ej: Rayuela'), 'Pedro Páramo')
+    await user.type(screen.getByPlaceholderText('Ej: Julio Cortázar'), 'Juan Rulfo')
+    await user.type(screen.getByPlaceholderText('Ej: Novela'), 'Realismo mágico')
+    await user.type(screen.getByPlaceholderText('Ej: 978-84-376-0494-7'), '9780307474278')
+
+    expect(screen.queryByText('Este ISBN ya está registrado')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /registrar libro/i })).toBeEnabled()
+
+    await user.click(screen.getByRole('button', { name: /registrar libro/i }))
+
+    expect(onSubmit).toHaveBeenCalledTimes(1)
+  })
+
+  it('en modo edición no considera duplicado su propio ISBN', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn()
+
+    useBooksStore.setState({
+      books: [makeBook()],
+    })
+
+    render(
+      <BookForm
+        initialData={{
+          title: 'Rayuela',
+          author: 'Julio Cortázar',
+          category: 'Novela',
+          isbn: '978-1-23-456789-7',
+          year: 1963,
+          quantity: 3,
+          description: '',
+        }}
+        editingId="book-1"
+        onSubmit={onSubmit}
+        onCancel={vi.fn()}
+      />
+    )
+
+    expect(screen.queryByText('Este ISBN ya está registrado')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /guardar cambios/i })).toBeEnabled()
+
+    await user.click(screen.getByRole('button', { name: /guardar cambios/i }))
+
+    expect(onSubmit).toHaveBeenCalledTimes(1)
+  })
+
+  it('muestra error de formato cuando el ISBN tiene longitud inválida', async () => {
+    const user = userEvent.setup()
+
+    render(<BookForm onSubmit={vi.fn()} onCancel={vi.fn()} />)
+
+    await user.type(screen.getByPlaceholderText('Ej: 978-84-376-0494-7'), '123456789')
+
+    expect(screen.getByRole('button', { name: /registrar libro/i })).toBeDisabled()
+
+    await user.clear(screen.getByPlaceholderText('Ej: 978-84-376-0494-7'))
+    await user.type(screen.getByPlaceholderText('Ej: 978-84-376-0494-7'), '12345678901')
+    await user.click(screen.getByRole('button', { name: /registrar libro/i }))
+
+    expect(screen.getByText(/ISBN inválido \(10 o 13 dígitos\)/i)).toBeInTheDocument()
   })
 })
