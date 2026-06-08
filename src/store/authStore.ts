@@ -24,17 +24,24 @@ const credentials: Record<
     session: AuthSession;
   }
 > = {
-  admin: {
+  "admin@kairon.com": {
     password: "admin123",
     session: {
       username: "admin",
       role: "admin",
     },
   },
-  usuario: {
+  "usuario1@kairon.com": {
     password: "usuario123",
     session: {
-      username: "usuario",
+      username: "Laura",
+      role: "usuario",
+    },
+  },
+  "usuario2@kairon.com": {
+    password: "usuario123",
+    session: {
+      username: "Mateo",
       role: "usuario",
     },
   },

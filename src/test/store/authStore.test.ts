@@ -8,7 +8,7 @@ describe("useAuthStore", () => {
   });
 
   it("guarda una sesión admin con credenciales correctas", () => {
-    const result = useAuthStore.getState().login("admin", "admin123");
+    const result = useAuthStore.getState().login("admin@kairon.com", "admin123");
 
     expect(result).toBe(true);
     expect(useAuthStore.getState().session).toEqual({
@@ -18,17 +18,17 @@ describe("useAuthStore", () => {
   });
 
   it("guarda una sesión usuario con credenciales correctas", () => {
-    const result = useAuthStore.getState().login("usuario", "usuario123");
+    const result = useAuthStore.getState().login("usuario1@kairon.com", "usuario123");
 
     expect(result).toBe(true);
     expect(useAuthStore.getState().session).toEqual({
-      username: "usuario",
+      username: "Laura",
       role: "usuario",
     });
   });
 
   it("no cambia el store con credenciales incorrectas", () => {
-    const result = useAuthStore.getState().login("admin", "incorrecta");
+    const result = useAuthStore.getState().login("admin@kairon.com", "incorrecta");
 
     expect(result).toBe(false);
     expect(useAuthStore.getState().session).toBeNull();

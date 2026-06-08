@@ -14,6 +14,9 @@ const BookDetailPage = lazy(() =>
 const LoansPage = lazy(() =>
   import('../pages/LoansPage').then((m) => ({ default: m.LoansPage }))
 );
+const MyLoansPage = lazy(() =>
+  import('../pages/MyLoansPage').then((m) => ({ default: m.MyLoansPage }))
+);
 const AdminPage = lazy(() =>
   import('../pages/AdminPage').then((m) => ({ default: m.AdminPage }))
 );
@@ -73,6 +76,7 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <CatalogPage /> },
           { path: 'books/:id', element: <BookDetailPage /> },
+          { path: 'my-loans', element: <MyLoansPage /> },
           {
             element: <ProtectedRoute requiredRole="admin" />,
             children: [
