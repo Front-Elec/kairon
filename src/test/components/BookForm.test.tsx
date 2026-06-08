@@ -26,14 +26,14 @@ describe('BookForm', () => {
     await user.clear(screen.getByPlaceholderText('Ej: Rayuela'))
     await user.clear(screen.getByPlaceholderText('Ej: Julio Cortázar'))
     await user.clear(screen.getByPlaceholderText('Ej: Novela'))
-    await user.clear(screen.getByPlaceholderText('000-0-00-000000-0'))
+    await user.clear(screen.getByPlaceholderText('Ej: 978-84-376-0494-7'))
 
     await user.click(screen.getByRole('button', { name: /registrar libro/i }))
 
     expect(screen.getByText('El título es requerido')).toBeInTheDocument()
     expect(screen.getByText('El autor es requerido')).toBeInTheDocument()
     expect(screen.getByText('La categoría es requerida')).toBeInTheDocument()
-    expect(screen.getByText(/Formato ISBN inválido/i)).toBeInTheDocument()
+    expect(screen.getByText(/ISBN inválido \(10 o 13 dígitos\)/i)).toBeInTheDocument()
   })
 
   it('llama onSubmit con los datos correctos cuando el formulario es válido', async () => {
@@ -45,7 +45,7 @@ describe('BookForm', () => {
     await user.type(screen.getByPlaceholderText('Ej: Rayuela'), 'Rayuela')
     await user.type(screen.getByPlaceholderText('Ej: Julio Cortázar'), 'Julio Cortázar')
     await user.type(screen.getByPlaceholderText('Ej: Novela'), 'Novela')
-    await user.type(screen.getByPlaceholderText('000-0-00-000000-0'), '978-1-23-456789-7')
+    await user.type(screen.getByPlaceholderText('Ej: 978-84-376-0494-7'), '978-1-23-456789-7')
 
     await user.click(screen.getByRole('button', { name: /registrar libro/i }))
 
