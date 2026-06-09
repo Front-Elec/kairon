@@ -964,12 +964,11 @@
 - Panel de préstamos con tabla y acciones (solicitar, devolver, ver historial)
 - Gráficas del dashboard: libros por categoría, préstamos por mes
 
-📸 `[INSERTAR CAPTURA 1: Formulario de solicitud de préstamo funcional]`
-📸 `[INSERTAR CAPTURA 2: Dashboard con las gráficas de estadísticas]`
-📸 `[INSERTAR CAPTURA 3: GitHub Issues #55, #56, #57, #58 en estado "Closed"]`
-📸 `[INSERTAR CAPTURA 4: PR #43 mergeado]`
-
+![alt text](<implementar formularios, prestamos y graficas.png>)
+![alt text](<55, 56, 57, 58.png>)
+![alt text](<Merge4.png>)
 ---
+Dashboard con las gráficas de estadísticas
 
 ### Fix #55-#58 — Conectar UI con stores reales y arreglar gráficas
 
@@ -985,10 +984,8 @@
 - Gráficas de Recharts/Chart.js conectadas a datos reales del sistema
 - Corrección de bugs en las gráficas (datos no actualizaban al cambiar el store)
 
-📸 `[INSERTAR CAPTURA 1: StatsPage con gráficas mostrando datos reales (no mock)]`
-📸 `[INSERTAR CAPTURA 2: Código del componente de gráfica conectado al store]`
-📸 `[INSERTAR CAPTURA 3: GitHub PR #64 mergeado]`
-
+![alt text](<componente grafico conect store.png>)
+![alt text](<Mergado #64.png>)
 ---
 
 ## PARTE 3 — RESUMEN ESTADÍSTICO DEL PROYECTO
