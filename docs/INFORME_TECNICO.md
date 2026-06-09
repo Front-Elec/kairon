@@ -341,8 +341,11 @@
 - Configuración en `vite.config.ts` y `tsconfig` para el entorno de test
 
 📸 `[INSERTAR CAPTURA 1: vite.config.ts con la sección `test` de Vitest]`
+![alt text](image-2.png)
 📸 `[INSERTAR CAPTURA 2: GitHub Issue #47 en estado "Closed"]`
+![alt text](image-4.png)
 📸 `[INSERTAR CAPTURA 3: PR #47 mergeado]`
+![alt text](image-3.png)
 
 ---
 
@@ -362,7 +365,9 @@
 
 📸 `[INSERTAR CAPTURA 1: Archivo de tests del formulario de libros con casos cubiertos]`
 📸 `[INSERTAR CAPTURA 2: Terminal con `npm run test` — pruebas en verde para book-form]`
+![alt text](image-1.png)
 📸 `[INSERTAR CAPTURA 3: GitHub Issue #48 en estado "Closed"]`
+![alt text](image-5.png)
 
 ---
 
