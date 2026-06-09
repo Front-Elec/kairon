@@ -530,7 +530,9 @@
 - Reducción del bundle inicial (chunk splitting por ruta)
 
 📸 `[INSERTAR CAPTURA 1: AppRouter.tsx mostrando las importaciones con React.lazy]`
+![alt text](image.png)  
 📸 `[INSERTAR CAPTURA 2: Build output (npm run build) mostrando los chunks separados por ruta]`
+![alt text](image-1.png)
 📸 `[INSERTAR CAPTURA 3: GitHub Issue / PR #39 en estado "Closed/Merged"]`
 
 ---
