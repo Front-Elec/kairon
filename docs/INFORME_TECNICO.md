@@ -364,6 +364,7 @@
 - Cobertura de casos borde (campos vacíos, ISBN duplicado)
 
 📸 `[INSERTAR CAPTURA 1: Archivo de tests del formulario de libros con casos cubiertos]`
+![alt text](image.png)
 📸 `[INSERTAR CAPTURA 2: Terminal con `npm run test` — pruebas en verde para book-form]`
 ![alt text](image-1.png)
 📸 `[INSERTAR CAPTURA 3: GitHub Issue #48 en estado "Closed"]`
