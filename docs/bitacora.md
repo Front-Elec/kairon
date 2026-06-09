@@ -27,7 +27,6 @@ npm install
 npm run lint
 npm run build
 ```
-
 ### Evidencia para el PDF (capturas de pantalla)
 | # | Qué capturar | Issue |
 |---|--------------|-------|
@@ -36,6 +35,9 @@ npm run build
 | 3 | Terminal después de `npm run build` (línea `✓ built in ...`) | #1 |
 | 4 | GitHub Issue #1 (estado Closed) | #1 |
 | 5 | Pull Request con `Closes #1` | #1 |
+![alt text](<Captura de pantalla 2026-05-27 161622.png>)
+![alt text](<Captura de pantalla 2026-05-27 161903.png>)
+![alt text](<Captura de pantalla 2026-05-27 163218.png>)
 
 ---
 
@@ -68,7 +70,11 @@ npm run build
 | 4 | GitHub Issue #2 (estado Closed) | #2 |
 | 5 | Pull Request con `Closes #2` aprobado por QA | #2 |
 | 6 | (Opcional) Terminal con push directo a `main` rechazado | #2 |
-
+![alt text](<Captura de pantalla 2026-05-27 165738.png>)
+![alt text](<Captura de pantalla 2026-05-27 165823.png>)
+![alt text](<Captura de pantalla 2026-05-27 171539.png>)
+![alt text](<Captura de pantalla 2026-05-27 172942.png>)
+![alt text](imageaaas.png)
 ### Notas
 - **Netlify deploy** → Issue #4
 - **Plantilla PR / labels** → Issue #3
@@ -99,6 +105,8 @@ npm run build
 | 2 | PR con `Closes #3` | #3 |
 | 3 | GitHub Issue #3 (estado Closed) | #3 |
 | 4 | Labels del repositorio (`devops`, `qa`, `ui-ux`, `interactions`, `state`, `performance`, `team`) | #3 |
+![alt text](<Captura de pantalla 2026-06-08 233154.png>)
+![alt text](<Captura de pantalla 2026-06-08 233539.png>)
 
 ---
 
@@ -133,6 +141,7 @@ npm run build
 | 3 | Netlify dashboard con proyecto conectado | #4 |
 | 4 | Deploy en estado Published / Success | #4 |
 | 5 | GitHub Issue #4 (estado Closed) | #4 |
+![alt text](<Captura de pantalla 2026-06-08 233632.png>)
 
 ---
 
@@ -161,7 +170,7 @@ npm run build
 | 3 | `src/vite-env.d.ts` con tipado de variables | #5 |
 | 4 | README con sección "Variables de entorno (Issue #5)" | #5 |
 | 5 | PR con `Closes #5` + Issue #5 cerrada | #5 |
-
+![alt text](<Captura de pantalla 2026-06-08 234043.png>)
 ---
 
 ## Sesión 2026-05-27 — Issue #6
@@ -191,3 +200,4 @@ npm run build
 | 3 | Terminal con `npm run lint` exitoso | #6 |
 | 4 | Terminal con `npm run build` exitoso (incluyendo lint) | #6 |
 | 5 | PR con `Closes #6` + Issue #6 cerrada | #6 |
+![alt text](<Captura de pantalla 2026-06-08 234203.png>)

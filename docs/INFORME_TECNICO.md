@@ -218,9 +218,8 @@
 - `README.md` con stack y convención de ramas
 - Rama `develop` creada como rama de integración
 
-📸 `[INSERTAR CAPTURA 1: VS Code con estructura de carpetas del proyecto abierta]`
-📸 `[INSERTAR CAPTURA 2: GitHub Issue #1 en estado "Closed"]`
-📸 `[INSERTAR CAPTURA 3: PR #28 mergeado con "Closes #1"]`
+![alt text](<Captura de pantalla 2026-06-08 234533.png>)
+![alt text](<Captura de pantalla 2026-05-27 163218.png>)
 
 ---
 
@@ -237,10 +236,10 @@
 - Regla de protección en GitHub: rama `main`, requiere PR + 1 aprobación
 - Bloqueo de force push y eliminación de rama
 - Convención documentada en `README.md`
+![alt text](<Captura de pantalla 2026-05-27 165738.png>)
+![alt text](<Captura de pantalla 2026-05-27 165823.png>)
+![alt text](imageaaas.png)
 
-📸 `[INSERTAR CAPTURA 1: GitHub Settings → Rules → regla "Proteger main - Kairon" activa]`
-📸 `[INSERTAR CAPTURA 2: GitHub Issue #2 en estado "Closed"]`
-📸 `[INSERTAR CAPTURA 3: PR #29 mergeado]`
 
 ---
 
@@ -256,10 +255,9 @@
 **Trabajo realizado:**
 - Plantilla `.github/PULL_REQUEST_TEMPLATE.md` con sección `Closes #N`, checklist `lint/build/test`
 - Labels creadas: `devops`, `qa`, `ui-ux`, `interactions`, `state`, `performance`, `team`
+![alt text](<Captura de pantalla 2026-06-08 233154.png>)
 
-📸 `[INSERTAR CAPTURA 1: Archivo .github/PULL_REQUEST_TEMPLATE.md]`
-📸 `[INSERTAR CAPTURA 2: Labels del repositorio en GitHub]`
-📸 `[INSERTAR CAPTURA 3: GitHub Issue #3 en estado "Closed"]`
+
 
 ---
 
@@ -276,9 +274,9 @@
 - `netlify.toml` configurado: `npm run build`, `publish = "dist"`, redirect SPA `/* → /index.html`
 - README actualizado con sección Netlify
 
-📸 `[INSERTAR CAPTURA 1: netlify.toml abierto en VS Code]`
-📸 `[INSERTAR CAPTURA 2: Netlify dashboard con proyecto importado y deploy activo]`
-📸 `[INSERTAR CAPTURA 3: GitHub Issue #4 en estado "Closed"]`
+![alt text](<Captura de pantalla 2026-06-08 235310.png>)
+![alt text](<Captura de pantalla 2026-06-08 235350.png>)
+![alt text](<Captura de pantalla 2026-06-08 233632.png>)
 
 ---
 
@@ -296,8 +294,8 @@
 - Tipado estricto de `import.meta.env` en `src/vite-env.d.ts`
 - `.env.example` con `VITE_API_BASE_URL`
 
-📸 `[INSERTAR CAPTURA 1: src/config/env.ts con el schema Zod]`
-📸 `[INSERTAR CAPTURA 2: GitHub Issue #5 en estado "Closed"]`
+![alt text](<Captura de pantalla 2026-06-08 235529.png>)
+![alt text](<Captura de pantalla 2026-06-08 234043.png>)
 
 ---
 
@@ -314,9 +312,8 @@
 - `eslint.config.js` con reglas `@typescript-eslint/no-unused-vars` y `no-unreachable` en error
 - `package.json`: script `build` encadena `lint && tsc -b && vite build`
 
-📸 `[INSERTAR CAPTURA 1: eslint.config.js con reglas reforzadas]`
-📸 `[INSERTAR CAPTURA 2: Terminal con `npm run lint` exitoso (0 errores)]`
-📸 `[INSERTAR CAPTURA 3: GitHub Issue #6 en estado "Closed"]`
+![alt text](<Captura de pantalla 2026-06-08 235643.png>)
+![alt text](<Captura de pantalla 2026-06-08 234203.png>)
 
 ---
 
