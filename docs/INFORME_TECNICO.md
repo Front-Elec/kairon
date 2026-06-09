@@ -1018,12 +1018,8 @@
 
 ## PARTE 4 — EVIDENCIA DEL PIPELINE CI/CD
 
-📸 `[INSERTAR CAPTURA: Netlify — lista de todos los deploys exitosos del proyecto (pantalla de "Deploys" en el dashboard de Netlify)]`
-
-📸 `[INSERTAR CAPTURA: Netlify — último deploy "Published" con el hash del commit del 2026-06-08]`
-
-📸 `[INSERTAR CAPTURA: GitHub Actions / Checks — PRs con checks en verde (si aplica)]`
-
+![alt text](<Captura de pantalla 2026-06-09 000356.png>)
+![alt text](<Captura de pantalla 2026-06-09 000500.png>)
 ---
 
 *Documento generado a partir del historial oficial de Git del repositorio Front-Elec/kairon — 2026-06-08*
